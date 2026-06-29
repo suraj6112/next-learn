@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0A0A0A;
+  --foreground: #EDEDED;
+  --primary-gold: #D4AF37;
+  --primary-gold-hover: #AA8B2C;
+  --flame-orange: #FF5722;
+  --charcoal: #121212;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gold: var(--primary-gold);
+  --color-gold-hover: var(--primary-gold-hover);
+  --color-orange: var(--flame-orange);
+  --color-charcoal: var(--charcoal);
+  --font-sans: var(--font-geist-sans), Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-gold);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gold-hover);
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(18, 18, 18, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* Luxury Gold Text/Border Glows */
+.gold-glow-text {
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.gold-glow-btn {
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+  transition: all 0.3s ease;
+}
+
+.gold-glow-btn:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+  border-color: var(--primary-gold);
+}
+
+/* Animated gradient borders */
+@keyframes gradient-border {
+  0% { border-color: rgba(212, 175, 55, 0.2); }
+  50% { border-color: rgba(255, 87, 34, 0.6); }
+  100% { border-color: rgba(212, 175, 55, 0.2); }
+}
+
+.animated-border {
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  animation: gradient-border 4s infinite ease-in-out;
+}
+
+/* Custom Cursor styles */
+.custom-cursor {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--primary-gold);
+  border-radius: 50%;
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.2s, height 0.2s, background-color 0.2s;
+  mix-blend-mode: difference;
+}
+
+@media (max-width: 1024px) {
+  .custom-cursor {
+    display: none;
+  }
+}
