@@ -1,7 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
+import Category from "@/models/Category";
+import Subcategory from "@/models/Subcategory";
 import { verifyToken, getAuthTokenFromHeader } from "@/lib/auth";
+
+async function resolveTaxonomy(payload: any) {
+  let categoryName = payload.category || "";
+  let subcategoryName = payload.subcategory || "";
+
+  if (payload.categoryId) {
+    const categoryDoc = await Category.findById(payload.categoryId).lean();
+    if (!categoryDoc) {
+      throw new Error("Selected category was not found");
+    }
+    categoryName = (categoryDoc as any).name;
+  }
+
+  if (payload.subcategoryId) {
+    const subcategoryDoc = await Subcategory.findById(payload.subcategoryId).lean();
+    if (!subcategoryDoc) {
+      throw new Error("Selected subcategory was not found");
+    }
+    subcategoryName = (subcategoryDoc as any).name;
+  }
+
+  return { categoryName, subcategoryName };
+}
 
 export async function POST(request: Request) {
   try {
@@ -14,9 +40,11 @@ export async function POST(request: Request) {
       ) as any;
     }
 
-    const { title, category, description, mediaUrls } = await request.json();
+    const payload = await request.json();
+    const { title, categoryId, subcategoryId, description, mediaUrls } = payload;
+    const { categoryName, subcategoryName } = await resolveTaxonomy(payload);
 
-    if (!title || !category || !description) {
+    if (!title || !categoryName || !description) {
       return NextResponse.json(
         { success: false, message: "Title, category, and description are required" },
         { status: 400 }
@@ -25,7 +53,10 @@ export async function POST(request: Request) {
 
     const event = await Event.create({
       title,
-      category,
+      category: categoryName,
+      subcategory: subcategoryName,
+      categoryId: categoryId || undefined,
+      subcategoryId: subcategoryId || undefined,
       description,
       mediaUrls: mediaUrls || [],
     });
@@ -46,7 +77,10 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     await dbConnect();
-    const events = await Event.find({}).sort({ createdAt: -1 });
+    const events = await Event.find({})
+      .populate("categoryId", "name slug")
+      .populate("subcategoryId", "name slug")
+      .sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: events });
   } catch (error: any) {
     return NextResponse.json(
@@ -67,9 +101,11 @@ export async function PUT(request: Request) {
       ) as any;
     }
 
-    const { id, title, category, description, mediaUrls } = await request.json();
+    const payload = await request.json();
+    const { id, title, categoryId, subcategoryId, description, mediaUrls } = payload;
+    const { categoryName, subcategoryName } = await resolveTaxonomy(payload);
 
-    if (!id || !title || !category || !description) {
+    if (!id || !title || !categoryName || !description) {
       return NextResponse.json(
         { success: false, message: "Missing required fields for update" },
         { status: 400 }
@@ -80,7 +116,10 @@ export async function PUT(request: Request) {
       id,
       {
         title,
-        category,
+        category: categoryName,
+        subcategory: subcategoryName,
+        categoryId: categoryId || undefined,
+        subcategoryId: subcategoryId || undefined,
         description,
         mediaUrls: mediaUrls || [],
       },

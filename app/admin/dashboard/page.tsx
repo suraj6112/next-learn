@@ -70,6 +70,9 @@ interface EventItem {
   _id: string;
   title: string;
   category: string;
+  subcategory?: string;
+  categoryId?: string | CategoryItem;
+  subcategoryId?: string | SubcategoryItem;
   description: string;
   mediaUrls: string[];
   createdAt: string;
@@ -149,6 +152,9 @@ const GALLERY_FORM = {
 const EVENT_FORM = {
   title: "",
   category: "Weddings",
+  subcategory: "",
+  categoryId: "",
+  subcategoryId: "",
   description: "",
   mediaUrl: "",
 };
@@ -243,6 +249,22 @@ export default function AdminDashboard() {
   const selectedEventCategory = eventCategoryOptions.includes(eventForm.category)
     ? eventForm.category
     : eventCategoryOptions[0] || "";
+
+  const selectedEventCategoryItem = useMemo(
+    () => activeCategories.find((item) => item.name === selectedEventCategory),
+    [activeCategories, selectedEventCategory]
+  );
+
+  const eventFilteredSubcategories = useMemo(
+    () => selectedEventCategoryItem
+      ? subcategories.filter((item) => getId(item.categoryId) === selectedEventCategoryItem._id && item.isActive)
+      : [],
+    [selectedEventCategoryItem, subcategories]
+  );
+
+  const eventSubcategoryOptions = useMemo(() => {
+    return eventFilteredSubcategories.map((item) => ({ value: item._id, label: item.name }));
+  }, [eventFilteredSubcategories]);
 
   const fetchCategories = useCallback(async () => {
     const res = await axios.get("/api/categories?includeInactive=true");
@@ -493,6 +515,9 @@ export default function AdminDashboard() {
         id: editingEventId || undefined,
         title: eventForm.title,
         category: selectedEventCategory,
+        subcategory: eventFilteredSubcategories.find((item) => item._id === eventForm.subcategoryId)?.name || eventForm.subcategory,
+        categoryId: selectedEventCategoryItem?._id,
+        subcategoryId: eventForm.subcategoryId || undefined,
         description: eventForm.description,
         mediaUrls: eventForm.mediaUrl ? [eventForm.mediaUrl] : [],
       };
@@ -627,9 +652,14 @@ export default function AdminDashboard() {
   };
 
   const editEvent = (item: EventItem) => {
+    const categoryId = getId(item.categoryId);
+    const subcategoryId = getId(item.subcategoryId);
     setEventForm({
       title: item.title,
       category: item.category,
+      subcategory: item.subcategory || "",
+      categoryId,
+      subcategoryId,
       description: item.description,
       mediaUrl: item.mediaUrls?.[0] || "",
     });
@@ -1172,9 +1202,24 @@ export default function AdminDashboard() {
                 <SelectField
                   label="Category"
                   value={selectedEventCategory}
-                  onChange={(value) => setEventForm({ ...eventForm, category: value })}
+                  onChange={(value) => setEventForm({ ...eventForm, category: value, subcategory: "", categoryId: "", subcategoryId: "" })}
                   options={eventCategoryOptions.map((value) => ({ value, label: value }))}
                 />
+                {(eventSubcategoryOptions.length > 0 || eventForm.subcategory) && (
+                  <SelectField
+                    label="Subcategory"
+                    value={eventForm.subcategoryId}
+                    onChange={(value) => {
+                      const selectedSubcategory = eventFilteredSubcategories.find((item) => item._id === value);
+                      setEventForm({
+                        ...eventForm,
+                        subcategoryId: value,
+                        subcategory: selectedSubcategory?.name || "",
+                      });
+                    }}
+                    options={[{ value: "", label: "No subcategory" }, ...eventSubcategoryOptions]}
+                  />
+                )}
                 <TextField label="Main Cover Media URL" value={eventForm.mediaUrl} onChange={(value) => setEventForm({ ...eventForm, mediaUrl: value })} />
                 <TextArea label="Description" required value={eventForm.description} onChange={(value) => setEventForm({ ...eventForm, description: value })} />
                 <SubmitButton loading={formLoading} label={editingEventId ? "Update Case-study" : "Publish Case-study"} />
@@ -1187,7 +1232,7 @@ export default function AdminDashboard() {
                 <ContentCard
                   key={item._id}
                   image={item.mediaUrls?.[0]}
-                  badge={item.category}
+                  badge={item.subcategory ? `${item.category} / ${item.subcategory}` : item.category}
                   eyebrow={new Date(item.createdAt).toLocaleDateString()}
                   title={item.title}
                   subtitle={item.description}

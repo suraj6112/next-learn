@@ -10,6 +10,7 @@ interface EventItem {
   _id: string;
   title: string;
   category: string;
+  subcategory?: string;
   description: string;
   mediaUrls: string[];
 }
@@ -70,7 +71,7 @@ export default function Events() {
                     <div className="w-full h-full bg-black" />
                   )}
                   <span className="absolute top-3 left-3 bg-black/80 border border-gold/20 text-gold font-semibold uppercase tracking-widest text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">
-                    {event.category}
+                    {event.subcategory ? `${event.category} / ${event.subcategory}` : event.category}
                   </span>
                 </div>
 
