@@ -20,6 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 import axios from "axios";
+import { uploadToCloudinary } from "@/lib/cloudinary-client";
 
 interface CategoryItem {
   _id: string;
@@ -477,15 +478,7 @@ export default function AdminDashboard() {
   };
 
   const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await axios.post("/api/admin/upload", formData, {
-      headers: { ...authHeaders, "Content-Type": "multipart/form-data" },
-    });
-    if (!res.data.success) {
-      throw new Error(res.data.message || "Upload failed");
-    }
-    return res.data as { url: string; thumbnailUrl?: string };
+    return uploadToCloudinary(file);
   };
 
   const handleFileUpload = async (
@@ -520,7 +513,7 @@ export default function AdminDashboard() {
       }
       setFormSuccess("File uploaded successfully.");
     } catch (err) {
-      console.error("File upload error:", err);
+      console.log("File upload error:", err);
       setFormError(
         getRequestErrorMessage(
           err,

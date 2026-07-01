@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, Database, Loader2, Pencil, Send, Trash, Upload, XCircle } from "lucide-react";
 import axios from "axios";
+import { uploadToCloudinary } from "@/lib/cloudinary-client";
 
 type SeoServiceItem = {
   _id: string;
@@ -159,22 +160,11 @@ export default function AdminSeoPage() {
 
     setUploadingHero(true);
     clearFeedback();
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const res = await axios.post("/api/admin/upload", formData, {
-        headers: {
-          ...authHeaders,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      if (res.data.success) {
-        setServiceForm((prev) => ({ ...prev, heroImage: res.data.url }));
-        setMessage("Hero image uploaded to Cloudinary.");
-      } else {
-        setError(res.data.message || "Hero image upload failed.");
-      }
+      const uploaded = await uploadToCloudinary(file);
+      setServiceForm((prev) => ({ ...prev, heroImage: uploaded.url }));
+      setMessage("Hero image uploaded to Cloudinary.");
     } catch (err) {
       setError(getRequestErrorMessage(err, "Hero image upload failed."));
     } finally {

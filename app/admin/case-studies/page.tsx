@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, Database, Loader2, Pencil, Send, Trash, Upload, XCircle } from "lucide-react";
 import axios from "axios";
+import { uploadToCloudinary } from "@/lib/cloudinary-client";
 
 type CaseStudyItem = {
   _id: string;
@@ -138,24 +139,18 @@ export default function AdminCaseStudiesPage() {
 
     setUploadingTarget(target);
     clearFeedback();
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const res = await axios.post("/api/admin/upload", formData, {
-        headers: { ...authHeaders, "Content-Type": "multipart/form-data" },
-      });
-      if (res.data.success) {
-        if (target === "cover") {
-          setForm((prev) => ({ ...prev, coverImage: res.data.url }));
-        } else {
-          setForm((prev) => ({
-            ...prev,
-            mediaUrlsText: [...splitLines(prev.mediaUrlsText), res.data.url].join("\n"),
-          }));
-        }
-        setMessage("File uploaded to Cloudinary.");
+      const uploaded = await uploadToCloudinary(file);
+      if (target === "cover") {
+        setForm((prev) => ({ ...prev, coverImage: uploaded.url }));
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          mediaUrlsText: [...splitLines(prev.mediaUrlsText), uploaded.url].join("\n"),
+        }));
       }
+      setMessage("File uploaded to Cloudinary.");
     } catch (err) {
       setError(getRequestErrorMessage(err, "File upload failed."));
     } finally {

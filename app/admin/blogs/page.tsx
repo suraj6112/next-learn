@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, Database, Loader2, Pencil, Send, Trash, Upload, XCircle } from "lucide-react";
 import axios from "axios";
+import { uploadToCloudinary } from "@/lib/cloudinary-client";
 
 type BlogItem = {
   _id: string;
@@ -125,17 +126,11 @@ export default function AdminBlogsPage() {
 
     setUploadingCover(true);
     clearFeedback();
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const res = await axios.post("/api/admin/upload", formData, {
-        headers: { ...authHeaders, "Content-Type": "multipart/form-data" },
-      });
-      if (res.data.success) {
-        setForm((prev) => ({ ...prev, coverImage: res.data.url }));
-        setMessage("Cover image uploaded to Cloudinary.");
-      }
+      const uploaded = await uploadToCloudinary(file);
+      setForm((prev) => ({ ...prev, coverImage: uploaded.url }));
+      setMessage("Cover image uploaded to Cloudinary.");
     } catch (err) {
       setError(getRequestErrorMessage(err, "Cover image upload failed."));
     } finally {
