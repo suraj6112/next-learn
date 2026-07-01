@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, ArrowUp, Heart, Play, Share2, Volume2, VolumeX, X } from "lucide-react";
 import Link from "next/link";
 
@@ -9,6 +9,8 @@ interface ReelItem {
   videoUrl: string;
   title: string;
   description: string;
+  category: string;
+  subcategory?: string;
   likes: string;
 }
 
@@ -23,6 +25,7 @@ interface CmsReelItem {
 
 export default function ReelsSection() {
   const [reels, setReels] = useState<ReelItem[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState("All");
   const [muted, setMuted] = useState(true);
   const [likedReels, setLikedReels] = useState<Record<string, boolean>>({});
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -44,6 +47,8 @@ export default function ReelsSection() {
               videoUrl: item.cloudinaryUrl,
               title: item.title,
               description: item.description || `${item.category}${item.subcategory ? ` / ${item.subcategory}` : ""}`,
+              category: item.category,
+              subcategory: item.subcategory,
               likes: `${Math.max(1, index + 2)}.${index + 3}K`,
             }))
           );
@@ -56,6 +61,18 @@ export default function ReelsSection() {
     }
     fetchReels();
   }, []);
+
+  const reelFilters = useMemo(() => {
+    const labels = reels.map((item) => item.subcategory || item.category).filter(Boolean);
+    return ["All", ...Array.from(new Set(labels)).slice(0, 8)];
+  }, [reels]);
+
+  const visibleReels = useMemo(
+    () => selectedFilter === "All"
+      ? reels.slice(0, 6)
+      : reels.filter((item) => (item.subcategory || item.category) === selectedFilter).slice(0, 6),
+    [reels, selectedFilter]
+  );
 
   const toggleMute = () => {
     setMuted(!muted);
@@ -92,12 +109,12 @@ export default function ReelsSection() {
   }, []);
 
   const scrollViewerTo = useCallback((index: number) => {
-    const nextIndex = Math.max(0, Math.min(reels.length - 1, index));
-    const reel = reels[nextIndex];
+    const nextIndex = Math.max(0, Math.min(visibleReels.length - 1, index));
+    const reel = visibleReels[nextIndex];
     if (!reel) return;
     viewerSlideRefs.current[reel.id]?.scrollIntoView({ behavior: "smooth", block: "start" });
     setViewerIndex(nextIndex);
-  }, [reels]);
+  }, [visibleReels]);
 
   const shareReel = async () => {
     try {
@@ -106,6 +123,13 @@ export default function ReelsSection() {
     } catch {
       alert("Copy failed. Please copy the website link manually.");
     }
+  };
+
+  const chooseFilter = (label: string) => {
+    setSelectedFilter(label);
+    setViewerIndex(null);
+    Object.values(videoRefs.current).forEach((video) => video?.pause());
+    Object.values(viewerVideoRefs.current).forEach((video) => video?.pause());
   };
 
   useEffect(() => {
@@ -119,7 +143,7 @@ export default function ReelsSection() {
 
   useEffect(() => {
     if (viewerIndex === null) return;
-    const reel = reels[viewerIndex];
+    const reel = visibleReels[viewerIndex];
     if (!reel) return;
 
     const frameId = window.requestAnimationFrame(() => {
@@ -136,7 +160,7 @@ export default function ReelsSection() {
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [muted, reels, viewerIndex]);
+  }, [muted, visibleReels, viewerIndex]);
 
   useEffect(() => {
     if (!isViewerOpen || !viewerContainerRef.current) return;
@@ -147,7 +171,7 @@ export default function ReelsSection() {
         const activeId = activeEntry?.target.getAttribute("data-reel-id");
         if (!activeId) return;
 
-        const nextIndex = reels.findIndex((reel) => reel.id === activeId);
+        const nextIndex = visibleReels.findIndex((reel) => reel.id === activeId);
         if (nextIndex === -1) return;
 
         setViewerIndex((current) => (current === nextIndex ? current : nextIndex));
@@ -155,13 +179,13 @@ export default function ReelsSection() {
       { root: viewerContainerRef.current, threshold: [0.6] }
     );
 
-    reels.forEach((reel) => {
+    visibleReels.forEach((reel) => {
       const slide = viewerSlideRefs.current[reel.id];
       if (slide) observer.observe(slide);
     });
 
     return () => observer.disconnect();
-  }, [isViewerOpen, reels]);
+  }, [isViewerOpen, visibleReels]);
 
   useEffect(() => {
     if (!isViewerOpen) return;
@@ -176,7 +200,7 @@ export default function ReelsSection() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeViewer, isViewerOpen, scrollViewerTo, viewerIndex]);
 
-  if (reels.length === 0) return null;
+  if (reels.length === 0 || visibleReels.length === 0) return null;
 
   return (
     <section className="py-24 bg-black border-t border-white/5 relative">
@@ -186,7 +210,7 @@ export default function ReelsSection() {
           <div>
             <span className="text-xs font-bold tracking-widest text-gold uppercase">Cinematic Reels</span>
             <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white mt-2">
-              Trending <span className="text-gold gold-glow-text">Moments</span>
+              Reels by <span className="text-gold gold-glow-text">Function</span>
             </h2>
           </div>
           <Link
@@ -197,6 +221,25 @@ export default function ReelsSection() {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
+
+        {reelFilters.length > 1 && (
+          <div className="mb-8 flex flex-wrap gap-2">
+            {reelFilters.map((label) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => chooseFilter(label)}
+                className={`rounded-md border px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors clickable ${
+                  selectedFilter === label
+                    ? "border-gold bg-gold text-black"
+                    : "border-white/10 bg-charcoal text-white/70 hover:border-gold/30 hover:text-white"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Global Sound Control */}
         <div className="flex justify-end mb-6">
@@ -211,7 +254,7 @@ export default function ReelsSection() {
 
         {/* Vertical Reels Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-          {reels.map((reel, index) => {
+          {visibleReels.map((reel, index) => {
             const isLiked = !!likedReels[reel.id];
             return (
               <div
@@ -245,6 +288,9 @@ export default function ReelsSection() {
                 {/* Left Side Reel Info (Bottom) */}
                 <div className="absolute bottom-0 left-0 w-[80%] p-6 flex flex-col gap-2 pointer-events-none">
                   <h3 className="text-white text-base font-bold tracking-wide">{reel.title}</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gold">
+                    {reel.subcategory || reel.category}
+                  </span>
                   <p className="text-white/70 text-xs font-light line-clamp-2">{reel.description}</p>
                 </div>
 
@@ -319,7 +365,7 @@ export default function ReelsSection() {
             ref={viewerContainerRef}
             className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth"
           >
-            {reels.map((reel, index) => {
+            {visibleReels.map((reel, index) => {
               const isLiked = !!likedReels[reel.id];
               return (
                 <div
@@ -349,7 +395,7 @@ export default function ReelsSection() {
                       <h3 className="text-lg font-bold tracking-wide text-white sm:text-xl">{reel.title}</h3>
                       <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/70">{reel.description}</p>
                       <p className="mt-4 text-[11px] font-semibold uppercase tracking-wider text-white/45">
-                        {index + 1} / {reels.length}
+                        {index + 1} / {visibleReels.length}
                       </p>
                     </div>
 
@@ -395,7 +441,7 @@ export default function ReelsSection() {
             </button>
             <button
               onClick={() => scrollViewerTo((viewerIndex ?? 0) + 1)}
-              disabled={(viewerIndex ?? 0) === reels.length - 1}
+              disabled={(viewerIndex ?? 0) === visibleReels.length - 1}
               className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white backdrop-blur-md transition-colors hover:border-gold hover:text-gold disabled:cursor-not-allowed disabled:opacity-30 clickable"
               aria-label="Next reel"
             >

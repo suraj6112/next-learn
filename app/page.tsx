@@ -1,11 +1,13 @@
-"use client";
-
 import Hero from "@/components/Hero";
 import StatsCounter from "@/components/StatsCounter";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 import ReelsSection from "@/components/ReelsSection";
 import FeaturedPreview from "@/components/FeaturedPreview";
 import SafetyShowcase from "@/components/SafetyShowcase";
+import HomeServiceExplorer from "@/components/HomeServiceExplorer";
+import HomeCaseStudies from "@/components/HomeCaseStudies";
+import HomePackages from "@/components/HomePackages";
+import HomeSeoLinks from "@/components/HomeSeoLinks";
 import Link from "next/link";
 import { ArrowRight, Flame } from "lucide-react";
 
@@ -18,19 +20,31 @@ export default function Home() {
       {/* 2. Dynamic Count-Up Statistics Section */}
       <StatsCounter />
 
-      {/* 3. Before/After Transformative Comparison Slider */}
+      {/* 3. Function-first service discovery */}
+      <HomeServiceExplorer />
+
+      {/* 4. Before/After Transformative Comparison Slider */}
       <BeforeAfterSlider />
 
-      {/* 4. Instagram Reels-Style short video Section */}
+      {/* 5. Instagram Reels-Style short video Section */}
       <ReelsSection />
 
-      {/* 5. Live DB-driven Featured Showcase */}
+      {/* 6. Live DB-driven Featured Showcase */}
       <FeaturedPreview />
 
-      {/* 6. Safety & Trust Standards Panel */}
+      {/* 7. Real event case studies */}
+      <HomeCaseStudies />
+
+      {/* 8. Packages and quick quote blocks */}
+      <HomePackages />
+
+      {/* 9. SEO service and city links */}
+      <HomeSeoLinks />
+
+      {/* 10. Safety & Trust Standards Panel */}
       <SafetyShowcase />
 
-      {/* 7. Direct Booking Banner (Urgency Indicator) */}
+      {/* 11. Direct Booking Banner (Urgency Indicator) */}
       <section className="py-24 bg-linear-to-t from-gold/5 via-black to-black border-t border-white/5 relative">
         <div className="max-w-4xl mx-auto px-4 text-center flex flex-col items-center gap-6">
           <div className="p-3 bg-gold/10 rounded-full border border-gold/30 text-gold animate-bounce">

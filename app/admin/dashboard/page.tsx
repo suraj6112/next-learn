@@ -86,6 +86,7 @@ interface InquiryItem {
   eventType: string;
   eventDate: string;
   message: string;
+  source?: string;
   createdAt: string;
 }
 
@@ -1071,6 +1072,7 @@ export default function AdminDashboard() {
                   <p className="text-[11px] text-white/40">
                     Submitted: {new Date(inq.createdAt).toLocaleString()} |
                     Event: {new Date(inq.eventDate).toLocaleDateString()}
+                    {inq.source ? ` | Source: ${inq.source}` : ""}
                   </p>
                 </div>
               ))}
@@ -1618,6 +1620,9 @@ export default function AdminDashboard() {
                   loading={uploadingTarget === "gallery"}
                   onChange={(e) => handleFileUpload(e, "gallery")}
                 />
+                <div className="mt-3 rounded-lg border border-gold/15 bg-gold/5 p-3 text-[11px] leading-5 text-white/60">
+                  Reels ke liye video upload karein, <span className="font-semibold text-gold">Use as reel</span> aur <span className="font-semibold text-gold">Show on home</span> on karein. Homepage featured media ke liye <span className="font-semibold text-gold">Featured gallery</span> + <span className="font-semibold text-gold">Show on home</span> use karein.
+                </div>
               </div>
               <form onSubmit={saveGallery} className="space-y-4">
                 <TextField

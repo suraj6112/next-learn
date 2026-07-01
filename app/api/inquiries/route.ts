@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Inquiry from "@/models/Inquiry";
@@ -6,7 +7,7 @@ import { verifyToken, getAuthTokenFromHeader } from "@/lib/auth";
 export async function POST(request: Request) {
   try {
     await dbConnect();
-    const { name, mobile, eventType, eventDate, message } = await request.json();
+    const { name, mobile, eventType, eventDate, message, source } = await request.json();
 
     if (!name || !mobile || !eventType || !eventDate || !message) {
       return NextResponse.json(
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
       eventType,
       eventDate: new Date(eventDate),
       message,
+      source: source || "",
     });
 
     return NextResponse.json({

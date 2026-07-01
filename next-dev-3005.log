@@ -1,0 +1,10 @@
+
+> sky-sfx@0.1.0 dev
+> next dev --port 3005
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3005
+- Network:       http://192.168.56.1:3005
+- Environments: .env
+✓ Ready in 764ms
+[?25h

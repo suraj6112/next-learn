@@ -6,6 +6,7 @@ export interface IInquiry extends Document {
   eventType: string;
   eventDate: Date;
   message: string;
+  source?: string;
   createdAt: Date;
 }
 
@@ -15,6 +16,7 @@ const InquirySchema: Schema = new Schema({
   eventType: { type: String, required: true },
   eventDate: { type: Date, required: true },
   message: { type: String, required: true },
+  source: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 
