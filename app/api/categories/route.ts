@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Unauthorized access" }, { status: 401 }) as any;
     }
 
-    const { name, slug, description, coverImage, videoPreview, sortOrder, isActive } = await request.json();
+    const { name, slug, description, coverImage, sortOrder, isActive } = await request.json();
     if (!name) {
       return NextResponse.json({ success: false, message: "Category name is required" }, { status: 400 }) as any;
     }
@@ -57,7 +57,6 @@ export async function POST(request: Request) {
       slug: slug ? createSlug(slug) : createSlug(name),
       description: description || "",
       coverImage: coverImage || "",
-      videoPreview: videoPreview || "",
       sortOrder: Number(sortOrder) || 0,
       isActive: isActive !== false,
     });
@@ -79,7 +78,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, message: "Unauthorized access" }, { status: 401 }) as any;
     }
 
-    const { id, name, slug, description, coverImage, videoPreview, sortOrder, isActive } = await request.json();
+    const { id, name, slug, description, coverImage, sortOrder, isActive } = await request.json();
     if (!id || !name) {
       return NextResponse.json({ success: false, message: "Category ID and name are required" }, { status: 400 }) as any;
     }
@@ -91,7 +90,6 @@ export async function PUT(request: Request) {
         slug: slug ? createSlug(slug) : createSlug(name),
         description: description || "",
         coverImage: coverImage || "",
-        videoPreview: videoPreview || "",
         sortOrder: Number(sortOrder) || 0,
         isActive: isActive !== false,
       },

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/lib/db";
-import { defaultPackages } from "@/lib/package-defaults";
 import Package from "@/models/Package";
 
 export type PackageData = {
@@ -47,17 +46,14 @@ function toPackage(doc: any): PackageData {
   };
 }
 
-const fallbackPackages: PackageData[] = defaultPackages.map((item) => ({ ...item }));
-
 export async function getPackages(options: { includeFallback?: boolean; includeInactive?: boolean } = {}) {
   try {
     await dbConnect();
     const filter = options.includeInactive ? {} : { isActive: true };
     const docs = await Package.find(filter).sort({ sortOrder: 1, name: 1 }).lean();
-    const packages = docs.map(toPackage);
-    return packages.length > 0 || options.includeFallback === false ? packages : fallbackPackages;
+    return docs.map(toPackage);
   } catch {
-    return options.includeFallback === false ? [] : fallbackPackages;
+    return [];
   }
 }
 

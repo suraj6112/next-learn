@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/lib/db";
-import { defaultBlogPosts } from "@/lib/blog-defaults";
 import BlogPost from "@/models/BlogPost";
 
 export type BlogPostData = {
@@ -41,20 +40,14 @@ function toBlogPost(doc: any): BlogPostData {
   };
 }
 
-const fallbackPosts: BlogPostData[] = defaultBlogPosts.map((post) => ({
-  ...post,
-  publishedAt: new Date(),
-}));
-
 export async function getBlogPosts(options: { includeFallback?: boolean; includeInactive?: boolean } = {}) {
   try {
     await dbConnect();
     const filter = options.includeInactive ? {} : { isActive: true };
     const docs = await BlogPost.find(filter).sort({ sortOrder: 1, publishedAt: -1 }).lean();
-    const posts = docs.map(toBlogPost);
-    return posts.length > 0 || options.includeFallback === false ? posts : fallbackPosts;
+    return docs.map(toBlogPost);
   } catch {
-    return options.includeFallback === false ? [] : fallbackPosts;
+    return [];
   }
 }
 

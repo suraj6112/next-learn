@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/lib/db";
-import { defaultCaseStudies } from "@/lib/case-study-defaults";
 import CaseStudy from "@/models/CaseStudy";
 
 export type CaseStudyData = {
@@ -55,17 +54,14 @@ function toCaseStudy(doc: any): CaseStudyData {
   };
 }
 
-const fallbackCaseStudies: CaseStudyData[] = defaultCaseStudies.map((item) => ({ ...item }));
-
 export async function getCaseStudies(options: { includeFallback?: boolean; includeInactive?: boolean } = {}) {
   try {
     await dbConnect();
     const filter = options.includeInactive ? {} : { isActive: true };
     const docs = await CaseStudy.find(filter).sort({ sortOrder: 1, eventDate: -1, title: 1 }).lean();
-    const items = docs.map(toCaseStudy);
-    return items.length > 0 || options.includeFallback === false ? items : fallbackCaseStudies;
+    return docs.map(toCaseStudy);
   } catch {
-    return options.includeFallback === false ? [] : fallbackCaseStudies;
+    return [];
   }
 }
 

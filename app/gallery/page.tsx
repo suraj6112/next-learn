@@ -36,56 +36,10 @@ interface SubcategoryItem {
   slug: string;
 }
 
-const MOCK_GALLERY: GalleryItem[] = [
-  {
-    _id: "m1",
-    title: "Sangeet Dance Performance",
-    category: "Choreography",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    _id: "m2",
-    title: "Grand Couple Walkway Pyro",
-    category: "Wedding Entries",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    _id: "m3",
-    title: "Extreme Fire Poi Spinning",
-    category: "Fire Shows",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    _id: "m4",
-    title: "Cinematic Fireworks Shells",
-    category: "Fire Shows",
-    mediaType: "video",
-    cloudinaryUrl: "https://assets.mixkit.co/videos/preview/mixkit-fireworks-bursting-in-the-night-sky-41440-large.mp4",
-    thumbnail: "https://images.unsplash.com/photo-1531058020387-3be344559767?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    _id: "m5",
-    title: "Groom ATV Quad-Bike Entry",
-    category: "Wedding Entries",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    _id: "m6",
-    title: "Sangeet Romantic Couple First Dance",
-    category: "Choreography",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=800",
-  },
-];
-
 const getId = (value: string | { _id: string } | undefined) => (typeof value === "string" ? value : value?._id || "");
 
 export default function Gallery() {
-  const [items, setItems] = useState<GalleryItem[]>(MOCK_GALLERY);
+  const [items, setItems] = useState<GalleryItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [subcategories, setSubcategories] = useState<SubcategoryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -107,8 +61,8 @@ export default function Gallery() {
         if (subcategoryRes.data.success) {
           setSubcategories(subcategoryRes.data.data);
         }
-        if (galleryRes.data.success && galleryRes.data.data && galleryRes.data.data.length > 0) {
-          setItems([...galleryRes.data.data, ...MOCK_GALLERY]);
+        if (galleryRes.data.success && galleryRes.data.data) {
+          setItems(galleryRes.data.data);
         }
       } catch (err) {
         console.error("Failed to fetch gallery data", err);
@@ -117,12 +71,7 @@ export default function Gallery() {
     fetchGalleryData();
   }, []);
 
-  const fallbackCategories = ["Wedding Entries", "Fire Shows", "Choreography", "Events"].map((name) => ({
-    _id: name,
-    name,
-    slug: name.toLowerCase().replace(/\s+/g, "-"),
-  }));
-  const visibleCategories = categories.length > 0 ? categories : fallbackCategories;
+  const visibleCategories = categories;
   const visibleSubcategories = subcategories.filter((item) => getId(item.categoryId) === selectedCategory);
 
   const filteredItems = items.filter((item) => {
@@ -261,11 +210,15 @@ export default function Gallery() {
             >
               {item.mediaType === "video" ? (
                 <div className="w-full h-full relative">
-                  <img
-                    src={item.thumbnail || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800"}
-                    alt={item.altText || item.title}
-                    className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {item.thumbnail ? (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.altText || item.title}
+                      className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-black" />
+                  )}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="p-3.5 rounded-full bg-black/60 border border-gold/30 text-gold backdrop-blur-sm group-hover:scale-110 transition-all">
                       <Play className="w-6 h-6 fill-gold" />

@@ -14,33 +14,8 @@ interface GalleryItem {
   thumbnail?: string;
 }
 
-const FALLBACK_FEATURED: GalleryItem[] = [
-  {
-    _id: "fb1",
-    title: "Groom Royal Entry with Pyro",
-    category: "Wedding Entries",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    _id: "fb2",
-    title: "Grand Sangeet Opening Choreography",
-    category: "Choreography",
-    mediaType: "image",
-    cloudinaryUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    _id: "fb3",
-    title: "Couples Sparklers Arch Walkway",
-    category: "Wedding Entries",
-    mediaType: "video",
-    cloudinaryUrl: "https://assets.mixkit.co/videos/preview/mixkit-celebration-fireworks-in-the-night-sky-3765-large.mp4",
-    thumbnail: "https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=600",
-  },
-];
-
 export default function FeaturedPreview() {
-  const [items, setItems] = useState<GalleryItem[]>(FALLBACK_FEATURED);
+  const [items, setItems] = useState<GalleryItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [muted, setMuted] = useState(true);
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
@@ -58,11 +33,6 @@ export default function FeaturedPreview() {
           return;
         }
 
-        const featuredRes = await fetch("/api/gallery?featured=true");
-        const featuredJson = await featuredRes.json();
-        if (featuredJson.success && featuredJson.data && featuredJson.data.length > 0) {
-          setItems(featuredJson.data.slice(0, 3));
-        }
       } catch (err) {
         console.error("Failed to load featured gallery", err);
       }
@@ -170,6 +140,8 @@ export default function FeaturedPreview() {
 
   const currentItem = viewerIndex !== null ? items[viewerIndex] : null;
 
+  if (items.length === 0) return null;
+
   return (
     <section className="py-24 bg-black border-t border-white/5 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -200,11 +172,15 @@ export default function FeaturedPreview() {
             >
               {item.mediaType === "video" ? (
                 <div className="w-full h-full relative">
-                  <img
-                    src={item.thumbnail || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=600"}
-                    alt={item.title}
-                    className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {item.thumbnail ? (
+                    <img
+                      src={item.thumbnail}
+                      alt={item.title}
+                      className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-black" />
+                  )}
                   {/* Play Icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="p-3 rounded-full bg-black/60 border border-gold/30 text-gold backdrop-blur-sm group-hover:scale-110 transition-transform">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -14,40 +14,16 @@ interface EventItem {
   mediaUrls: string[];
 }
 
-const FALLBACK_EVENTS: EventItem[] = [
-  {
-    _id: "ev1",
-    title: "The Royal Rajputana Wedding Entry",
-    category: "Weddings",
-    description: "A royal experience. The groom entered on a majestic horse chariot escorting the bride, surrounded by 8 synchronized cold-pyros firing up to 4 meters high, backed by live classical sitar and classical dhol players.",
-    mediaUrls: ["https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800"],
-  },
-  {
-    _id: "ev2",
-    title: "TechFest 2025 Grand Finale Sky-show",
-    category: "Corporate Events",
-    description: "We delivered a custom, high-intensity outdoor sky-shot firework show for 5,000+ students and corporate dignitaries. Synthesized to match the bass of the official theme anthem.",
-    mediaUrls: ["https://images.unsplash.com/photo-1531241412435-42217-42217?auto=format&fit=crop&q=80&w=800"],
-  },
-  {
-    _id: "ev3",
-    title: "Sangeet Extravaganza at Taj Palace",
-    category: "Dance Sangeet",
-    description: "An end-to-end designed thematic sangeet performance containing customized family story skits, professional shadow dancers, and beginner waltz instruction for the couple's special first dance.",
-    mediaUrls: ["https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800"],
-  },
-];
-
 export default function Events() {
-  const [events, setEvents] = useState<EventItem[]>(FALLBACK_EVENTS);
+  const [events, setEvents] = useState<EventItem[]>([]);
 
   useEffect(() => {
     async function fetchEvents() {
       try {
         const res = await axios.get("/api/events");
         const json = res.data;
-        if (json.success && json.data && json.data.length > 0) {
-          setEvents([...json.data, ...FALLBACK_EVENTS]);
+        if (json.success && json.data) {
+          setEvents(json.data);
         }
       } catch (err) {
         console.error("Failed to load events", err);
@@ -84,11 +60,15 @@ export default function Events() {
               <div>
                 {/* Media Image */}
                 <div className="relative aspect-video rounded-xl overflow-hidden mb-6 border border-white/5">
-                  <img
-                    src={event.mediaUrls[0] || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=600"}
-                    alt={event.title}
-                    className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
-                  />
+                  {event.mediaUrls[0] ? (
+                    <img
+                      src={event.mediaUrls[0]}
+                      alt={event.title}
+                      className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-black" />
+                  )}
                   <span className="absolute top-3 left-3 bg-black/80 border border-gold/20 text-gold font-semibold uppercase tracking-widest text-[10px] px-3 py-1 rounded-full backdrop-blur-sm">
                     {event.category}
                   </span>

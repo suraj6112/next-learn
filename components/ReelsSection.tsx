@@ -21,32 +21,8 @@ interface CmsReelItem {
   cloudinaryUrl: string;
 }
 
-const REELS_DATA: ReelItem[] = [
-  {
-    id: "1",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-fireworks-bursting-in-the-night-sky-41440-large.mp4",
-    title: "Spectacular Cold Pyro Entry",
-    description: "The grand couple entry made legendary with timed sparklers. #GrandWedding #ColdPyro",
-    likes: "4.8K",
-  },
-  {
-    id: "2",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-fire-breather-performing-at-night-42217-large.mp4",
-    title: "Extreme Fire Breathing Show",
-    description: "A mesmerizing and safe fire act performed by professional artists. #FireShow #ExtremeAction",
-    likes: "3.2K",
-  },
-  {
-    id: "3",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-people-dancing-at-a-wedding-party-42488-large.mp4",
-    title: "Sangeet Energy Flashmob",
-    description: "Cousins shaking the dancefloor with custom high-energy choreography. #Sangeet #DanceChoreography",
-    likes: "5.1K",
-  },
-];
-
 export default function ReelsSection() {
-  const [reels, setReels] = useState<ReelItem[]>(REELS_DATA);
+  const [reels, setReels] = useState<ReelItem[]>([]);
   const [muted, setMuted] = useState(true);
   const [likedReels, setLikedReels] = useState<Record<string, boolean>>({});
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -74,19 +50,6 @@ export default function ReelsSection() {
           return;
         }
 
-        const fallbackRes = await fetch("/api/gallery?reels=true");
-        const fallbackJson = await fallbackRes.json();
-        if (fallbackJson.success && fallbackJson.data && fallbackJson.data.length > 0) {
-          setReels(
-            (fallbackJson.data as CmsReelItem[]).slice(0, 6).map((item, index) => ({
-              id: item._id,
-              videoUrl: item.cloudinaryUrl,
-              title: item.title,
-              description: item.description || `${item.category}${item.subcategory ? ` / ${item.subcategory}` : ""}`,
-              likes: `${Math.max(1, index + 2)}.${index + 3}K`,
-            }))
-          );
-        }
       } catch (err) {
         console.error("Failed to load dynamic reels", err);
       }
@@ -212,6 +175,8 @@ export default function ReelsSection() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeViewer, isViewerOpen, scrollViewerTo, viewerIndex]);
+
+  if (reels.length === 0) return null;
 
   return (
     <section className="py-24 bg-black border-t border-white/5 relative">

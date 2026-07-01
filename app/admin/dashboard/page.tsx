@@ -27,7 +27,6 @@ interface CategoryItem {
   slug: string;
   description?: string;
   coverImage?: string;
-  videoPreview?: string;
   sortOrder: number;
   isActive: boolean;
 }
@@ -113,7 +112,6 @@ const CATEGORY_FORM = {
   slug: "",
   description: "",
   coverImage: "",
-  videoPreview: "",
   sortOrder: 0,
   isActive: true,
 };
@@ -380,7 +378,7 @@ export default function AdminDashboard() {
     return res.data as { url: string; thumbnailUrl?: string };
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "categoryCover" | "categoryVideo" | "subcategoryCover" | "gallery" | "event") => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "categoryCover" | "subcategoryCover" | "gallery" | "event") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -390,9 +388,6 @@ export default function AdminDashboard() {
       const uploaded = await uploadFile(file);
       if (target === "categoryCover") {
         setCategoryForm((prev) => ({ ...prev, coverImage: uploaded.url }));
-      }
-      if (target === "categoryVideo") {
-        setCategoryForm((prev) => ({ ...prev, videoPreview: uploaded.url }));
       }
       if (target === "subcategoryCover") {
         setSubcategoryForm((prev) => ({ ...prev, coverImage: uploaded.url }));
@@ -586,7 +581,6 @@ export default function AdminDashboard() {
       slug: item.slug,
       description: item.description || "",
       coverImage: item.coverImage || "",
-      videoPreview: item.videoPreview || "",
       sortOrder: item.sortOrder || 0,
       isActive: item.isActive !== false,
     });
@@ -996,14 +990,12 @@ export default function AdminDashboard() {
               />
               <div className="space-y-3 mb-5">
                 <Uploader label="Cover Image" accept="image/*" loading={uploadingTarget === "categoryCover"} onChange={(e) => handleFileUpload(e, "categoryCover")} />
-                <Uploader label="Video Preview" accept="video/*" loading={uploadingTarget === "categoryVideo"} onChange={(e) => handleFileUpload(e, "categoryVideo")} />
               </div>
               <form onSubmit={saveCategory} className="space-y-4">
                 <TextField label="Name" required value={categoryForm.name} onChange={(value) => setCategoryForm({ ...categoryForm, name: value })} />
                 <TextField label="Slug" value={categoryForm.slug} onChange={(value) => setCategoryForm({ ...categoryForm, slug: value })} placeholder="Auto from name if blank" />
                 <TextArea label="Description" value={categoryForm.description} onChange={(value) => setCategoryForm({ ...categoryForm, description: value })} />
                 <TextField label="Cover Image URL" value={categoryForm.coverImage} onChange={(value) => setCategoryForm({ ...categoryForm, coverImage: value })} />
-                <TextField label="Video Preview URL" value={categoryForm.videoPreview} onChange={(value) => setCategoryForm({ ...categoryForm, videoPreview: value })} />
                 <NumberField label="Sort Order" value={categoryForm.sortOrder} onChange={(value) => setCategoryForm({ ...categoryForm, sortOrder: value })} />
                 <Checkbox label="Active" checked={categoryForm.isActive} onChange={(checked) => setCategoryForm({ ...categoryForm, isActive: checked })} />
                 <SubmitButton loading={formLoading} label={editingCategoryId ? "Update Category" : "Create Category"} />
