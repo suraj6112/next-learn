@@ -47,6 +47,17 @@ export default async function LocationsPage() {
                   </div>
                 </div>
 
+                {location.videoUrl && (
+                  <div className="mb-6 overflow-hidden rounded-lg border border-gold/15 bg-black">
+                    <video
+                      src={location.videoUrl}
+                      controls
+                      preload="metadata"
+                      className="w-full aspect-video bg-black object-contain"
+                    />
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {pages.map((page) => (
                     <Link

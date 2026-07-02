@@ -12,6 +12,8 @@ interface EventItem {
   category: string;
   subcategory?: string;
   description: string;
+  coverImage?: string;
+  videoUrl?: string;
   mediaUrls: string[];
 }
 
@@ -61,9 +63,9 @@ export default function Events() {
               <div>
                 {/* Media Image */}
                 <div className="relative aspect-video rounded-xl overflow-hidden mb-6 border border-white/5">
-                  {event.mediaUrls[0] ? (
+                  {(event.coverImage || event.mediaUrls[0]) ? (
                     <img
-                      src={event.mediaUrls[0]}
+                      src={event.coverImage || event.mediaUrls[0]}
                       alt={event.title}
                       className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
                     />

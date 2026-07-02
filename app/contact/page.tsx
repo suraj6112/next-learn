@@ -6,7 +6,7 @@ import { AlertCircle, Mail, MapPin, MessageSquare, Phone, Send, Sparkles, X } fr
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { conversionEvents, trackEvent } from "@/lib/analytics";
-import { getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
+import { getVisiblePhoneContacts, getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
 import SocialBrandIcon from "@/components/SocialBrandIcon";
 
 function ContactFormContent() {
@@ -30,6 +30,7 @@ function ContactFormContent() {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const contactSettings = useContactSettings();
+  const phoneContacts = getVisiblePhoneContacts(contactSettings);
   const whatsappUrl = getWhatsappUrlFromSettings(
     contactSettings,
     "Hello! I am on your contact page and want to discuss an event booking."
@@ -287,32 +288,19 @@ function ContactFormContent() {
                 </a>
               </div>
 
-              {(contactSettings.instagramUrl || contactSettings.facebookUrl) && (
+              {contactSettings.instagramUrl && (
                 <div className="rounded-xl border border-white/5 bg-black/25 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gold">View Our Work</p>
-                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                    {contactSettings.instagramUrl && (
-                      <a
-                        href={contactSettings.instagramUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-gold/30 hover:text-gold clickable"
-                      >
-                        <SocialBrandIcon type="instagram" className="h-4 w-4" />
-                        Instagram
-                      </a>
-                    )}
-                    {contactSettings.facebookUrl && (
-                      <a
-                        href={contactSettings.facebookUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-gold/30 hover:text-gold clickable"
-                      >
-                        <SocialBrandIcon type="facebook" className="h-4 w-4" />
-                        Facebook
-                      </a>
-                    )}
+                  <div className="mt-3 grid grid-cols-1 gap-3">
+                    <a
+                      href={contactSettings.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-gold/30 hover:text-gold clickable"
+                    >
+                      <SocialBrandIcon type="instagram" className="h-4 w-4" />
+                      Instagram
+                    </a>
                   </div>
                 </div>
               )}
@@ -322,14 +310,24 @@ function ContactFormContent() {
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-white/80 font-bold text-sm">{contactSettings.phoneLabel}</h4>
-                  <a
-                    href={contactSettings.phoneHref}
-                    onClick={() => trackEvent(conversionEvents.phoneClick, { placement: "contact_direct_connect" })}
-                    className="text-white hover:text-gold transition-colors text-base font-semibold mt-1 block"
-                  >
-                    {contactSettings.phone}
-                  </a>
+                  {phoneContacts.map((item, index) => (
+                    <div key={item.key} className={index > 0 ? "mt-3 border-t border-white/5 pt-3" : ""}>
+                      <h4 className={index > 0 ? "text-white/70 font-bold text-xs" : "text-white/80 font-bold text-sm"}>
+                        {item.label}
+                      </h4>
+                      <a
+                        href={item.href}
+                        onClick={() =>
+                          trackEvent(conversionEvents.phoneClick, {
+                            placement: index === 0 ? "contact_direct_connect" : "contact_direct_connect_secondary",
+                          })
+                        }
+                        className="text-white hover:text-gold transition-colors text-base font-semibold mt-1 block"
+                      >
+                        {item.phone}
+                      </a>
+                    </div>
+                  ))}
                 </div>
               </div>
 

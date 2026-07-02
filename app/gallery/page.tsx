@@ -12,12 +12,7 @@ interface GalleryItem {
   subcategory?: string;
   categoryId?: string | { _id: string; name: string; slug: string };
   subcategoryId?: string | { _id: string; name: string; slug: string };
-  description?: string;
   altText?: string;
-  caption?: string;
-  city?: string;
-  serviceSlug?: string;
-  duration?: string;
   mediaType: "image" | "video";
   cloudinaryUrl: string;
   thumbnail?: string;
@@ -108,11 +103,10 @@ export default function Gallery() {
       "@context": "https://schema.org",
       "@type": isVideo ? "VideoObject" : "ImageObject",
       name: item.title,
-      description: item.caption || item.description || `${item.category}${item.city ? ` in ${item.city}` : ""}`,
+      description: item.altText || `${item.title} by SKY SFX`,
       contentUrl: item.cloudinaryUrl,
       thumbnailUrl: item.thumbnail || item.cloudinaryUrl,
       uploadDate: new Date().toISOString(),
-      ...(item.duration && isVideo ? { duration: item.duration } : {}),
     };
   });
 
@@ -241,7 +235,6 @@ export default function Gallery() {
                 <h3 className="text-white font-bold text-base mt-1 group-hover:text-gold transition-colors">
                   {item.title}
                 </h3>
-                {item.caption && <p className="text-white/60 text-xs mt-1 line-clamp-1">{item.caption}</p>}
               </div>
             </motion.div>
           ))}
@@ -310,9 +303,6 @@ export default function Gallery() {
               <h2 className="text-white font-serif text-xl sm:text-2xl font-bold mt-1">
                 {currentItem.title}
               </h2>
-              {(currentItem.caption || currentItem.description) && (
-                <p className="text-white/60 text-sm leading-6 mt-2">{currentItem.caption || currentItem.description}</p>
-              )}
             </div>
           </div>
         )}

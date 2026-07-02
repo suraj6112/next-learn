@@ -34,6 +34,7 @@ function toService(doc: any): SeoServiceType {
     keywords: normalizeArray(doc.keywords),
     category: doc.category,
     heroImage: doc.heroImage,
+    videoUrl: doc.videoUrl || "",
     intro: doc.intro,
     highlights: normalizeArray(doc.highlights),
     process: normalizeArray(doc.process),
@@ -49,6 +50,7 @@ function toLocation(doc: any): ServiceLocation {
     state: doc.state,
     serviceAreas: normalizeArray(doc.serviceAreas),
     intro: doc.intro,
+    videoUrl: doc.videoUrl || "",
   };
 }
 

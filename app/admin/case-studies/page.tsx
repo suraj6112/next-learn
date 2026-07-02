@@ -71,6 +71,9 @@ const getRequestErrorMessage = (error: unknown, fallback: string) => {
     const responseData = error.response?.data as { message?: string } | undefined;
     return responseData?.message || fallback;
   }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
   return fallback;
 };
 
@@ -141,7 +144,9 @@ export default function AdminCaseStudiesPage() {
     clearFeedback();
 
     try {
-      const uploaded = await uploadToCloudinary(file);
+      const uploaded = await uploadToCloudinary(file, {
+        onRetry: (attempt) => setMessage(`Upload slow/fail hua, retry ${attempt}/3 chal raha hai...`),
+      });
       if (target === "cover") {
         setForm((prev) => ({ ...prev, coverImage: uploaded.url }));
       } else {

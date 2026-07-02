@@ -7,6 +7,7 @@ export type SeoService = {
   keywords: string[];
   category: string;
   heroImage: string;
+  videoUrl?: string;
   intro: string;
   highlights: string[];
   process: string[];

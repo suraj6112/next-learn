@@ -10,7 +10,6 @@ export const siteSeo = {
   email: businessProfile.email,
   sameAs: [
     "https://www.instagram.com/",
-    "https://www.facebook.com/",
     "https://www.youtube.com/",
   ],
 };

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Calendar, CheckCircle2, MessageCircle, Phone, Sparkles } from "lucide-react";
-import { getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
+import { getVisiblePhoneContacts, getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
 
 export default function Hero() {
   const contactSettings = useContactSettings();
@@ -11,6 +11,7 @@ export default function Hero() {
     contactSettings,
     "Hello! I am visiting your website and want to inquire about a custom choreography/fire show event package."
   );
+  const phoneContacts = getVisiblePhoneContacts(contactSettings);
 
   return (
     <section className="relative flex min-h-190 h-dvh w-full items-center justify-center overflow-hidden bg-black px-4 pt-24 pb-24 sm:px-6">
@@ -107,16 +108,25 @@ export default function Hero() {
           </a>
         </motion.div>
 
-        <motion.a
-          href={contactSettings.phoneHref}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.75 }}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-white/58 transition-colors hover:text-gold"
+          className="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-white/58"
         >
-          <Phone className="h-3.5 w-3.5 text-gold" />
-          <span>Direct call: {contactSettings.phone}</span>
-        </motion.a>
+          {phoneContacts.map((item) => (
+            <a
+              key={item.key}
+              href={item.href}
+              className="inline-flex items-center gap-2 transition-colors hover:text-gold"
+            >
+              <Phone className="h-3.5 w-3.5 text-gold" />
+              <span>
+                {item.label}: {item.phone}
+              </span>
+            </a>
+          ))}
+        </motion.div>
       </div>
 
       {/* Floating Spark Effects (Pure CSS Animation overlay) */}

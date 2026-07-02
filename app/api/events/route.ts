@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const payload = await request.json();
-    const { title, categoryId, subcategoryId, description, mediaUrls } = payload;
+    const { title, categoryId, subcategoryId, description, coverImage, videoUrl, mediaUrls } = payload;
     const { categoryName, subcategoryName } = await resolveTaxonomy(payload);
 
     if (!title || !categoryName || !description) {
@@ -51,6 +51,10 @@ export async function POST(request: Request) {
       ) as any;
     }
 
+    const cleanMediaUrls = Array.isArray(mediaUrls) && mediaUrls.length > 0
+      ? mediaUrls
+      : [coverImage, videoUrl].filter(Boolean);
+
     const event = await Event.create({
       title,
       category: categoryName,
@@ -58,7 +62,9 @@ export async function POST(request: Request) {
       categoryId: categoryId || undefined,
       subcategoryId: subcategoryId || undefined,
       description,
-      mediaUrls: mediaUrls || [],
+      coverImage: coverImage || cleanMediaUrls[0] || "",
+      videoUrl: videoUrl || "",
+      mediaUrls: cleanMediaUrls,
     });
 
     return NextResponse.json({
@@ -102,7 +108,7 @@ export async function PUT(request: Request) {
     }
 
     const payload = await request.json();
-    const { id, title, categoryId, subcategoryId, description, mediaUrls } = payload;
+    const { id, title, categoryId, subcategoryId, description, coverImage, videoUrl, mediaUrls } = payload;
     const { categoryName, subcategoryName } = await resolveTaxonomy(payload);
 
     if (!id || !title || !categoryName || !description) {
@@ -111,6 +117,10 @@ export async function PUT(request: Request) {
         { status: 400 }
       ) as any;
     }
+
+    const cleanMediaUrls = Array.isArray(mediaUrls) && mediaUrls.length > 0
+      ? mediaUrls
+      : [coverImage, videoUrl].filter(Boolean);
 
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
@@ -121,7 +131,9 @@ export async function PUT(request: Request) {
         categoryId: categoryId || undefined,
         subcategoryId: subcategoryId || undefined,
         description,
-        mediaUrls: mediaUrls || [],
+        coverImage: coverImage || cleanMediaUrls[0] || "",
+        videoUrl: videoUrl || "",
+        mediaUrls: cleanMediaUrls,
       },
       { new: true }
     );

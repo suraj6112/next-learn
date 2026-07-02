@@ -164,6 +164,26 @@ export default async function ServiceSeoPage({ params }: PageProps) {
         </div>
       </section>
 
+      {service.videoUrl && (
+        <section className="py-20 border-b border-white/5">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <span className="text-xs font-bold tracking-widest text-gold uppercase">Service Video</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold mt-3 mb-8">
+              See {service.shortTitle} in action
+            </h2>
+            <div className="overflow-hidden rounded-lg border border-gold/15 bg-black">
+              <video
+                src={service.videoUrl}
+                controls
+                preload="metadata"
+                poster={service.heroImage}
+                className="w-full aspect-video bg-black object-contain"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-20 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
           <div>

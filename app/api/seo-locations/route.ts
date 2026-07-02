@@ -23,6 +23,7 @@ function buildPayload(body: any) {
     state: body.state,
     serviceAreas: cleanArray(body.serviceAreas),
     intro: body.intro,
+    videoUrl: body.videoUrl || "",
     sortOrder: Number(body.sortOrder) || 0,
     isActive: body.isActive !== false,
   };

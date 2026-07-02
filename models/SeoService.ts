@@ -9,6 +9,7 @@ export interface ISeoService extends Document {
   keywords: string[];
   category: string;
   heroImage: string;
+  videoUrl?: string;
   intro: string;
   highlights: string[];
   process: string[];
@@ -40,6 +41,7 @@ const SeoServiceSchema = new Schema(
     keywords: { type: [String], default: [] },
     category: { type: String, required: true, trim: true },
     heroImage: { type: String, required: true },
+    videoUrl: { type: String, default: "", trim: true },
     intro: { type: String, required: true },
     highlights: { type: [String], default: [] },
     process: { type: [String], default: [] },

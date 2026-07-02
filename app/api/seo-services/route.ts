@@ -36,6 +36,7 @@ function buildPayload(body: any) {
     keywords: cleanArray(body.keywords),
     category: body.category,
     heroImage: body.heroImage,
+    videoUrl: body.videoUrl || "",
     intro: body.intro,
     highlights: cleanArray(body.highlights),
     process: cleanArray(body.process),

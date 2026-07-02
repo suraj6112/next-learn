@@ -17,6 +17,7 @@ type SeoServiceItem = {
   keywords: string[];
   category: string;
   heroImage: string;
+  videoUrl?: string;
   intro: string;
   highlights: string[];
   process: string[];
@@ -33,6 +34,7 @@ type SeoLocationItem = {
   state: string;
   serviceAreas: string[];
   intro: string;
+  videoUrl?: string;
   sortOrder: number;
   isActive: boolean;
 };
@@ -46,6 +48,7 @@ const SERVICE_FORM = {
   keywordsText: "",
   category: "",
   heroImage: "",
+  videoUrl: "",
   intro: "",
   highlightsText: "",
   processText: "",
@@ -61,6 +64,7 @@ const LOCATION_FORM = {
   state: "",
   serviceAreasText: "",
   intro: "",
+  videoUrl: "",
   sortOrder: 0,
   isActive: true,
 };
@@ -84,6 +88,9 @@ const getRequestErrorMessage = (error: unknown, fallback: string) => {
     const responseData = error.response?.data as { message?: string } | undefined;
     return responseData?.message || fallback;
   }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
   return fallback;
 };
 
@@ -104,7 +111,7 @@ export default function AdminSeoPage() {
   const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingTarget, setUploadingTarget] = useState<"serviceHero" | "serviceVideo" | "locationVideo" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,21 +161,34 @@ export default function AdminSeoPage() {
     }
   };
 
-  const uploadHeroImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadSeoFile = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "serviceHero" | "serviceVideo" | "locationVideo",
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingHero(true);
+    setUploadingTarget(target);
     clearFeedback();
 
     try {
-      const uploaded = await uploadToCloudinary(file);
-      setServiceForm((prev) => ({ ...prev, heroImage: uploaded.url }));
-      setMessage("Hero image uploaded to Cloudinary.");
+      const uploaded = await uploadToCloudinary(file, {
+        onRetry: (attempt) => setMessage(`Upload slow/fail hua, retry ${attempt}/3 chal raha hai...`),
+      });
+      if (target === "serviceHero") {
+        setServiceForm((prev) => ({ ...prev, heroImage: uploaded.url }));
+      }
+      if (target === "serviceVideo") {
+        setServiceForm((prev) => ({ ...prev, videoUrl: uploaded.url }));
+      }
+      if (target === "locationVideo") {
+        setLocationForm((prev) => ({ ...prev, videoUrl: uploaded.url }));
+      }
+      setMessage("File uploaded to Cloudinary.");
     } catch (err) {
-      setError(getRequestErrorMessage(err, "Hero image upload failed."));
+      setError(getRequestErrorMessage(err, "File upload failed."));
     } finally {
-      setUploadingHero(false);
+      setUploadingTarget(null);
       e.target.value = "";
     }
   };
@@ -240,6 +260,7 @@ export default function AdminSeoPage() {
       keywordsText: service.keywords.join("\n"),
       category: service.category,
       heroImage: service.heroImage,
+      videoUrl: service.videoUrl || "",
       intro: service.intro,
       highlightsText: service.highlights.join("\n"),
       processText: service.process.join("\n"),
@@ -259,6 +280,7 @@ export default function AdminSeoPage() {
       state: location.state,
       serviceAreasText: location.serviceAreas.join("\n"),
       intro: location.intro,
+      videoUrl: location.videoUrl || "",
       sortOrder: location.sortOrder || 0,
       isActive: location.isActive !== false,
     });
@@ -361,11 +383,11 @@ export default function AdminSeoPage() {
                   <input
                     type="file"
                     accept="image/*"
-                    disabled={uploadingHero}
-                    onChange={uploadHeroImage}
+                    disabled={uploadingTarget === "serviceHero"}
+                    onChange={(e) => uploadSeoFile(e, "serviceHero")}
                     className="w-full text-xs text-white/60 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gold file:text-black hover:file:bg-gold-hover file:cursor-pointer bg-black/40 border border-white/10 rounded-lg p-2 clickable"
                   />
-                  {uploadingHero && (
+                  {uploadingTarget === "serviceHero" && (
                     <span className="text-xs text-gold animate-pulse flex items-center gap-2 mt-3">
                       <Loader2 className="w-3 h-3 animate-spin" />
                       Uploading hero image...
@@ -377,6 +399,29 @@ export default function AdminSeoPage() {
                   <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 bg-black">
                     <img src={serviceForm.heroImage} alt="SEO service hero preview" className="w-full h-full object-cover opacity-80" />
                   </div>
+                )}
+                <div className="p-4 rounded-lg border border-gold/10 bg-black/30">
+                  <span className="text-xs font-bold text-gold uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <Upload className="w-4 h-4" />
+                    Upload Service Video to Cloudinary
+                  </span>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    disabled={uploadingTarget === "serviceVideo"}
+                    onChange={(e) => uploadSeoFile(e, "serviceVideo")}
+                    className="w-full text-xs text-white/60 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gold file:text-black hover:file:bg-gold-hover file:cursor-pointer bg-black/40 border border-white/10 rounded-lg p-2 clickable"
+                  />
+                  {uploadingTarget === "serviceVideo" && (
+                    <span className="text-xs text-gold animate-pulse flex items-center gap-2 mt-3">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Uploading service video...
+                    </span>
+                  )}
+                </div>
+                <TextField label="Service Video URL" value={serviceForm.videoUrl} onChange={(value) => setServiceForm({ ...serviceForm, videoUrl: value })} />
+                {serviceForm.videoUrl && (
+                  <video src={serviceForm.videoUrl} controls className="w-full rounded-lg border border-white/10 bg-black" />
                 )}
                 <TextArea label="Intro" required value={serviceForm.intro} onChange={(value) => setServiceForm({ ...serviceForm, intro: value })} />
                 <TextArea label="Keywords (one per line)" value={serviceForm.keywordsText} onChange={(value) => setServiceForm({ ...serviceForm, keywordsText: value })} />
@@ -422,6 +467,29 @@ export default function AdminSeoPage() {
                 <TextField label="State" required value={locationForm.state} onChange={(value) => setLocationForm({ ...locationForm, state: value })} />
                 <TextArea label="Service Areas (one per line)" value={locationForm.serviceAreasText} onChange={(value) => setLocationForm({ ...locationForm, serviceAreasText: value })} />
                 <TextArea label="Local Intro" required value={locationForm.intro} onChange={(value) => setLocationForm({ ...locationForm, intro: value })} />
+                <div className="p-4 rounded-lg border border-gold/10 bg-black/30">
+                  <span className="text-xs font-bold text-gold uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <Upload className="w-4 h-4" />
+                    Upload Location Video to Cloudinary
+                  </span>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    disabled={uploadingTarget === "locationVideo"}
+                    onChange={(e) => uploadSeoFile(e, "locationVideo")}
+                    className="w-full text-xs text-white/60 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gold file:text-black hover:file:bg-gold-hover file:cursor-pointer bg-black/40 border border-white/10 rounded-lg p-2 clickable"
+                  />
+                  {uploadingTarget === "locationVideo" && (
+                    <span className="text-xs text-gold animate-pulse flex items-center gap-2 mt-3">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Uploading location video...
+                    </span>
+                  )}
+                </div>
+                <TextField label="Location Video URL" value={locationForm.videoUrl} onChange={(value) => setLocationForm({ ...locationForm, videoUrl: value })} />
+                {locationForm.videoUrl && (
+                  <video src={locationForm.videoUrl} controls className="w-full rounded-lg border border-white/10 bg-black" />
+                )}
                 <NumberField label="Sort Order" value={locationForm.sortOrder} onChange={(value) => setLocationForm({ ...locationForm, sortOrder: value })} />
                 <Checkbox label="Active" checked={locationForm.isActive} onChange={(checked) => setLocationForm({ ...locationForm, isActive: checked })} />
                 <SubmitButton loading={saving} label={editingLocationId ? "Update Location" : "Create Location"} />

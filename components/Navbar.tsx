@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Flame, Menu, MessageCircle, Phone, X } from "lucide-react";
-import { getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
+import { getVisiblePhoneContacts, getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
 import { conversionEvents, trackEvent } from "@/lib/analytics";
 import SocialBrandIcon from "@/components/SocialBrandIcon";
 
@@ -33,6 +33,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const contactSettings = useContactSettings();
   const whatsappUrl = getWhatsappUrlFromSettings(contactSettings);
+  const phoneContacts = getVisiblePhoneContacts(contactSettings);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +51,7 @@ export default function Navbar() {
           : "py-5 bg-gradient-to-b from-black/70 to-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-6 xl:px-8">
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2">
@@ -63,14 +64,14 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-4 xl:gap-5">
             {PRIMARY_NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative rounded-full px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
+                  className={`relative whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
                     isActive ? "bg-gold/10 text-gold" : "text-white/76 hover:bg-white/5 hover:text-white"
                   }`}
                 >
@@ -82,7 +83,7 @@ export default function Navbar() {
             <div className="relative group">
               <button
                 type="button"
-                className={`flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
+                className={`flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-300 ${
                   EXPLORE_NAV_ITEMS.some((item) => pathname === item.href)
                     ? "bg-gold/10 text-gold"
                     : "text-white/76 hover:bg-white/5 hover:text-white"
@@ -113,44 +114,40 @@ export default function Navbar() {
           </div>
 
           {/* Call / Contact CTA */}
-          <div className="hidden lg:flex items-center gap-4">
-            <a
-              href={contactSettings.phoneHref}
-              onClick={() => trackEvent(conversionEvents.phoneClick, { placement: "navbar_desktop" })}
-              className="hidden xl:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition-colors duration-300 hover:border-gold/30 hover:text-gold"
-            >
-              <Phone className="w-4 h-4 text-gold" />
-              <span>{contactSettings.phone}</span>
-            </a>
-            {(contactSettings.instagramUrl || contactSettings.facebookUrl) && (
+          <div className="hidden lg:flex items-center gap-3 xl:gap-4">
+            <div className="hidden xl:flex items-center gap-2">
+              {phoneContacts.map((item, index) => (
+                <a
+                  key={item.key}
+                  href={item.href}
+                  onClick={() =>
+                    trackEvent(conversionEvents.phoneClick, {
+                      placement: index === 0 ? "navbar_desktop" : "navbar_desktop_secondary",
+                    })
+                  }
+                  className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition-colors duration-300 hover:border-gold/30 hover:text-gold"
+                >
+                  <Phone className="w-4 h-4 text-gold" />
+                  <span>{item.phone}</span>
+                </a>
+              ))}
+            </div>
+            {contactSettings.instagramUrl && (
               <div className="hidden xl:flex items-center gap-2">
-                {contactSettings.instagramUrl && (
-                  <a
-                    href={contactSettings.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition-colors hover:border-gold/30 hover:text-gold"
-                    aria-label="Open Instagram"
-                  >
-                    <SocialBrandIcon type="instagram" className="h-4 w-4" />
-                  </a>
-                )}
-                {contactSettings.facebookUrl && (
-                  <a
-                    href={contactSettings.facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition-colors hover:border-gold/30 hover:text-gold"
-                    aria-label="Open Facebook"
-                  >
-                    <SocialBrandIcon type="facebook" className="h-4 w-4" />
-                  </a>
-                )}
+                <a
+                  href={contactSettings.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition-colors hover:border-gold/30 hover:text-gold"
+                  aria-label="Open Instagram"
+                >
+                  <SocialBrandIcon type="instagram" className="h-4 w-4" />
+                </a>
               </div>
             )}
             <Link
               href="/contact"
-              className="px-5 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-gold hover:bg-gold-hover rounded-md transition-all duration-300 gold-glow-btn"
+              className="whitespace-nowrap px-5 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-gold hover:bg-gold-hover rounded-md transition-all duration-300 gold-glow-btn"
             >
               Get Free Quote
             </Link>
@@ -199,6 +196,20 @@ export default function Navbar() {
               <Phone className="w-4 h-4 text-gold" />
               <span>{contactSettings.phone}</span>
             </a>
+            {phoneContacts.slice(1).map((item) => (
+              <a
+                key={item.key}
+                href={item.href}
+                onClick={() => {
+                  setIsOpen(false);
+                  trackEvent(conversionEvents.phoneClick, { placement: "navbar_mobile_secondary" });
+                }}
+                className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/85"
+              >
+                <Phone className="w-4 h-4 text-gold" />
+                <span>{item.phone}</span>
+              </a>
+            ))}
             <a
               href={whatsappUrl}
               target="_blank"
@@ -212,32 +223,18 @@ export default function Navbar() {
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp Inquiry</span>
             </a>
-            {(contactSettings.instagramUrl || contactSettings.facebookUrl) && (
-              <div className="grid grid-cols-2 gap-2">
-                {contactSettings.instagramUrl && (
-                  <a
-                    href={contactSettings.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/80"
-                  >
-                    <SocialBrandIcon type="instagram" className="h-4 w-4" />
-                    Instagram
-                  </a>
-                )}
-                {contactSettings.facebookUrl && (
-                  <a
-                    href={contactSettings.facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/80"
-                  >
-                    <SocialBrandIcon type="facebook" className="h-4 w-4" />
-                    Facebook
-                  </a>
-                )}
+            {contactSettings.instagramUrl && (
+              <div className="grid grid-cols-1 gap-2">
+                <a
+                  href={contactSettings.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/80"
+                >
+                  <SocialBrandIcon type="instagram" className="h-4 w-4" />
+                  Instagram
+                </a>
               </div>
             )}
             <Link

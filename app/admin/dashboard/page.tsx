@@ -13,6 +13,7 @@ import {
   LogOut,
   Pencil,
   Phone,
+  Plus,
   Send,
   Sparkles,
   Trash,
@@ -50,12 +51,7 @@ interface GalleryItem {
   subcategory?: string;
   categoryId?: string | CategoryItem;
   subcategoryId?: string | SubcategoryItem;
-  description?: string;
   altText?: string;
-  caption?: string;
-  city?: string;
-  serviceSlug?: string;
-  duration?: string;
   mediaType: "image" | "video";
   cloudinaryUrl: string;
   thumbnail?: string;
@@ -75,6 +71,8 @@ interface EventItem {
   categoryId?: string | CategoryItem;
   subcategoryId?: string | SubcategoryItem;
   description: string;
+  coverImage?: string;
+  videoUrl?: string;
   mediaUrls: string[];
   createdAt: string;
 }
@@ -103,13 +101,15 @@ interface ContactSettings {
   phoneLabel: string;
   phone: string;
   phoneHref: string;
+  phoneLabel2: string;
+  phone2: string;
+  phoneHref2: string;
   whatsappNumber: string;
   emailLabel: string;
   email: string;
   addressLabel: string;
   address: string;
   instagramUrl: string;
-  facebookUrl: string;
 }
 
 const CATEGORY_FORM = {
@@ -135,12 +135,7 @@ const GALLERY_FORM = {
   title: "",
   categoryId: "",
   subcategoryId: "",
-  description: "",
   altText: "",
-  caption: "",
-  city: "",
-  serviceSlug: "",
-  duration: "",
   mediaType: "image" as "image" | "video",
   cloudinaryUrl: "",
   thumbnail: "",
@@ -158,7 +153,8 @@ const EVENT_FORM = {
   categoryId: "",
   subcategoryId: "",
   description: "",
-  mediaUrl: "",
+  coverImage: "",
+  videoUrl: "",
 };
 
 const FALLBACK_EVENT_CATEGORIES = [
@@ -208,13 +204,15 @@ const CONTACT_SETTINGS_FORM: ContactSettings = {
   phoneLabel: "Call/Call Helpline",
   phone: "+91 99999 99999",
   phoneHref: "tel:+919999999999",
+  phoneLabel2: "Alternate Call",
+  phone2: "",
+  phoneHref2: "",
   whatsappNumber: "919999999999",
   emailLabel: "Send Professional Email",
   email: "bookings@skysfx.in",
   addressLabel: "HQ Location",
   address: "SKY SFX, Jaipur, Rajasthan, India",
   instagramUrl: "",
-  facebookUrl: "",
 };
 
 type ActiveTab =
@@ -232,6 +230,9 @@ const getRequestErrorMessage = (error: unknown, fallback: string) => {
       | { message?: string }
       | undefined;
     return responseData?.message || fallback;
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
   }
   return fallback;
 };
@@ -279,6 +280,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -479,17 +481,30 @@ export default function AdminDashboard() {
   };
 
   const uploadFile = async (file: File) => {
-    return uploadToCloudinary(file);
+    return uploadToCloudinary(file, {
+      onProgress: setUploadProgress,
+      onRetry: (attempt) => {
+        setUploadProgress(null);
+        setFormSuccess(`Upload slow/fail hua, retry ${attempt}/3 chal raha hai...`);
+      },
+    });
   };
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    target: "categoryCover" | "subcategoryCover" | "gallery" | "event",
+    target:
+      | "categoryCover"
+      | "subcategoryCover"
+      | "galleryMedia"
+      | "galleryCover"
+      | "eventCover"
+      | "eventVideo",
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploadingTarget(target);
+    setUploadProgress(0);
     clearFeedback();
     try {
       const uploaded = await uploadFile(file);
@@ -499,18 +514,27 @@ export default function AdminDashboard() {
       if (target === "subcategoryCover") {
         setSubcategoryForm((prev) => ({ ...prev, coverImage: uploaded.url }));
       }
-      if (target === "gallery") {
+      if (target === "galleryMedia") {
         const detectedType = file.type.startsWith("video/") ? "video" : "image";
         setGalleryForm((prev) => ({
           ...prev,
           mediaType: detectedType,
           cloudinaryUrl: uploaded.url,
-          thumbnail: uploaded.thumbnailUrl || uploaded.url,
+          thumbnail: prev.thumbnail || uploaded.thumbnailUrl || (detectedType === "image" ? uploaded.url : ""),
           isReel: detectedType === "video" ? prev.isReel : false,
         }));
       }
-      if (target === "event") {
-        setEventForm((prev) => ({ ...prev, mediaUrl: uploaded.url }));
+      if (target === "galleryCover") {
+        setGalleryForm((prev) => ({
+          ...prev,
+          thumbnail: uploaded.url,
+        }));
+      }
+      if (target === "eventCover") {
+        setEventForm((prev) => ({ ...prev, coverImage: uploaded.url }));
+      }
+      if (target === "eventVideo") {
+        setEventForm((prev) => ({ ...prev, videoUrl: uploaded.url }));
       }
       setFormSuccess("File uploaded successfully.");
     } catch (err) {
@@ -523,6 +547,7 @@ export default function AdminDashboard() {
       );
     } finally {
       setUploadingTarget(null);
+      setUploadProgress(null);
       e.target.value = "";
     }
   };
@@ -532,13 +557,18 @@ export default function AdminDashboard() {
     setFormLoading(true);
     clearFeedback();
     try {
+      const payload = {
+        ...categoryForm,
+        slug: "",
+        description: "",
+      };
       const request = editingCategoryId
         ? axios.put(
             "/api/categories",
-            { id: editingCategoryId, ...categoryForm },
+            { id: editingCategoryId, ...payload },
             { headers: authHeaders },
           )
-        : axios.post("/api/categories", categoryForm, { headers: authHeaders });
+        : axios.post("/api/categories", payload, { headers: authHeaders });
       const res = await request;
       if (res.data.success) {
         setFormSuccess(
@@ -560,13 +590,18 @@ export default function AdminDashboard() {
     setFormLoading(true);
     clearFeedback();
     try {
+      const payload = {
+        ...subcategoryForm,
+        slug: "",
+        description: "",
+      };
       const request = editingSubcategoryId
         ? axios.put(
             "/api/subcategories",
-            { id: editingSubcategoryId, ...subcategoryForm },
+            { id: editingSubcategoryId, ...payload },
             { headers: authHeaders },
           )
-        : axios.post("/api/subcategories", subcategoryForm, {
+        : axios.post("/api/subcategories", payload, {
             headers: authHeaders,
           });
       const res = await request;
@@ -599,6 +634,11 @@ export default function AdminDashboard() {
     try {
       const payload = {
         ...galleryForm,
+        description: "",
+        caption: "",
+        city: "",
+        serviceSlug: "",
+        duration: "",
         subcategoryId: galleryForm.subcategoryId || undefined,
       };
       const request = editingGalleryId
@@ -645,7 +685,9 @@ export default function AdminDashboard() {
         categoryId: selectedEventCategoryItem?._id,
         subcategoryId: eventForm.subcategoryId || undefined,
         description: eventForm.description,
-        mediaUrls: eventForm.mediaUrl ? [eventForm.mediaUrl] : [],
+        coverImage: eventForm.coverImage,
+        videoUrl: eventForm.videoUrl,
+        mediaUrls: [eventForm.coverImage, eventForm.videoUrl].filter(Boolean),
       };
       const request = editingEventId
         ? axios.put("/api/events", payload, { headers: authHeaders })
@@ -673,6 +715,33 @@ export default function AdminDashboard() {
       prev.map((item, itemIndex) =>
         itemIndex === index ? { ...item, ...patch } : item,
       ),
+    );
+  };
+
+  const addHomeStat = () => {
+    setHomeStats((prev) => [
+      ...prev,
+      {
+        key: `custom-stat-${Date.now()}`,
+        label: "",
+        value: 0,
+        suffix: "+",
+        sortOrder: prev.length + 1,
+        isActive: true,
+      },
+    ]);
+  };
+
+  const removeHomeStat = (index: number) => {
+    setHomeStats((prev) =>
+      prev.length <= 1
+        ? prev
+        : prev
+            .filter((_, itemIndex) => itemIndex !== index)
+            .map((item, itemIndex) => ({
+              ...item,
+              sortOrder: itemIndex + 1,
+            })),
     );
   };
 
@@ -792,12 +861,7 @@ export default function AdminDashboard() {
       title: item.title,
       categoryId: getId(item.categoryId),
       subcategoryId: getId(item.subcategoryId),
-      description: item.description || "",
       altText: item.altText || "",
-      caption: item.caption || "",
-      city: item.city || "",
-      serviceSlug: item.serviceSlug || "",
-      duration: item.duration || "",
       mediaType: item.mediaType,
       cloudinaryUrl: item.cloudinaryUrl,
       thumbnail: item.thumbnail || "",
@@ -824,7 +888,8 @@ export default function AdminDashboard() {
       categoryId,
       subcategoryId,
       description: item.description,
-      mediaUrl: item.mediaUrls?.[0] || "",
+      coverImage: item.coverImage || item.mediaUrls?.[0] || "",
+      videoUrl: item.videoUrl || item.mediaUrls?.[1] || "",
     });
     setEditingEventId(item._id);
     eventFormRef.current?.scrollIntoView({
@@ -1094,6 +1159,14 @@ export default function AdminDashboard() {
                 onCancel={() => setHomeStats(HOME_STATS_FORM)}
               />
               <form onSubmit={saveHomeStats} className="space-y-5">
+                <button
+                  type="button"
+                  onClick={addHomeStat}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gold/25 bg-gold/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/15"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Another Stat
+                </button>
                 {homeStats.map((stat, index) => (
                   <div
                     key={stat.key || index}
@@ -1103,13 +1176,24 @@ export default function AdminDashboard() {
                       <span className="text-xs font-bold uppercase tracking-wider text-gold">
                         Counter {index + 1}
                       </span>
-                      <Checkbox
-                        label="Active"
-                        checked={stat.isActive}
-                        onChange={(checked) =>
-                          updateHomeStat(index, { isActive: checked })
-                        }
-                      />
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          label="Active"
+                          checked={stat.isActive}
+                          onChange={(checked) =>
+                            updateHomeStat(index, { isActive: checked })
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeHomeStat(index)}
+                          disabled={homeStats.length <= 1}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-500/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+                          aria-label={`Remove stat ${index + 1}`}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                     <TextField
                       label="Label"
@@ -1208,6 +1292,33 @@ export default function AdminDashboard() {
                   placeholder="tel:+919999999999"
                 />
                 <TextField
+                  label="Second Phone Label"
+                  value={contactSettings.phoneLabel2}
+                  onChange={(value) =>
+                    setContactSettings({
+                      ...contactSettings,
+                      phoneLabel2: value,
+                    })
+                  }
+                  placeholder="Alternate Call"
+                />
+                <TextField
+                  label="Second Phone Number"
+                  value={contactSettings.phone2}
+                  onChange={(value) =>
+                    setContactSettings({ ...contactSettings, phone2: value })
+                  }
+                  placeholder="+91 88888 88888"
+                />
+                <TextField
+                  label="Second Phone Link"
+                  value={contactSettings.phoneHref2}
+                  onChange={(value) =>
+                    setContactSettings({ ...contactSettings, phoneHref2: value })
+                  }
+                  placeholder="tel:+918888888888"
+                />
+                <TextField
                   label="WhatsApp Number"
                   value={contactSettings.whatsappNumber}
                   onChange={(value) =>
@@ -1265,17 +1376,6 @@ export default function AdminDashboard() {
                   }
                   placeholder="https://www.instagram.com/yourpage"
                 />
-                <TextField
-                  label="Facebook URL"
-                  value={contactSettings.facebookUrl}
-                  onChange={(value) =>
-                    setContactSettings({
-                      ...contactSettings,
-                      facebookUrl: value,
-                    })
-                  }
-                  placeholder="https://www.facebook.com/yourpage"
-                />
                 <SubmitButton
                   loading={formLoading}
                   label="Save Direct Connect"
@@ -1294,6 +1394,15 @@ export default function AdminDashboard() {
                     value: contactSettings.phone,
                     href: contactSettings.phoneHref,
                   },
+                  ...(contactSettings.phone2
+                    ? [
+                        {
+                          label: contactSettings.phoneLabel2,
+                          value: contactSettings.phone2,
+                          href: contactSettings.phoneHref2,
+                        },
+                      ]
+                    : []),
                   {
                     label: "WhatsApp",
                     value: contactSettings.whatsappNumber,
@@ -1314,15 +1423,6 @@ export default function AdminDashboard() {
                           label: "Instagram",
                           value: contactSettings.instagramUrl,
                           href: contactSettings.instagramUrl,
-                        },
-                      ]
-                    : []),
-                  ...(contactSettings.facebookUrl
-                    ? [
-                        {
-                          label: "Facebook",
-                          value: contactSettings.facebookUrl,
-                          href: contactSettings.facebookUrl,
                         },
                       ]
                     : []),
@@ -1374,6 +1474,7 @@ export default function AdminDashboard() {
                   label="Cover Image"
                   accept="image/*"
                   loading={uploadingTarget === "categoryCover"}
+                  progress={uploadingTarget === "categoryCover" ? uploadProgress : null}
                   onChange={(e) => handleFileUpload(e, "categoryCover")}
                 />
               </div>
@@ -1384,21 +1485,6 @@ export default function AdminDashboard() {
                   value={categoryForm.name}
                   onChange={(value) =>
                     setCategoryForm({ ...categoryForm, name: value })
-                  }
-                />
-                <TextField
-                  label="Slug"
-                  value={categoryForm.slug}
-                  onChange={(value) =>
-                    setCategoryForm({ ...categoryForm, slug: value })
-                  }
-                  placeholder="Auto from name if blank"
-                />
-                <TextArea
-                  label="Description"
-                  value={categoryForm.description}
-                  onChange={(value) =>
-                    setCategoryForm({ ...categoryForm, description: value })
                   }
                 />
                 <TextField
@@ -1438,9 +1524,9 @@ export default function AdminDashboard() {
                   key={item._id}
                   image={item.coverImage}
                   badge={item.isActive ? "Active" : "Hidden"}
-                  eyebrow={`/${item.slug}`}
+                  eyebrow={`Sort ${item.sortOrder || 0}`}
                   title={item.name}
-                  subtitle={item.description || "No description added."}
+                  subtitle={item.slug ? `/${item.slug}` : "Auto slug"}
                   onEdit={() => editCategory(item)}
                   onDelete={() =>
                     deleteItem(
@@ -1488,6 +1574,7 @@ export default function AdminDashboard() {
                   label="Cover Image"
                   accept="image/*"
                   loading={uploadingTarget === "subcategoryCover"}
+                  progress={uploadingTarget === "subcategoryCover" ? uploadProgress : null}
                   onChange={(e) => handleFileUpload(e, "subcategoryCover")}
                 />
               </div>
@@ -1513,24 +1600,6 @@ export default function AdminDashboard() {
                   value={subcategoryForm.name}
                   onChange={(value) =>
                     setSubcategoryForm({ ...subcategoryForm, name: value })
-                  }
-                />
-                <TextField
-                  label="Slug"
-                  value={subcategoryForm.slug}
-                  onChange={(value) =>
-                    setSubcategoryForm({ ...subcategoryForm, slug: value })
-                  }
-                  placeholder="Auto from name if blank"
-                />
-                <TextArea
-                  label="Description"
-                  value={subcategoryForm.description}
-                  onChange={(value) =>
-                    setSubcategoryForm({
-                      ...subcategoryForm,
-                      description: value,
-                    })
                   }
                 />
                 <TextField
@@ -1578,9 +1647,9 @@ export default function AdminDashboard() {
                   key={item._id}
                   image={item.coverImage}
                   badge={item.isActive ? "Active" : "Hidden"}
-                  eyebrow={`${typeof item.categoryId === "string" ? "Category" : item.categoryId.name} / ${item.slug}`}
+                  eyebrow={typeof item.categoryId === "string" ? "Category" : item.categoryId.name}
                   title={item.name}
-                  subtitle={item.description || "No description added."}
+                  subtitle={item.slug ? `/${item.slug}` : "Auto slug"}
                   onEdit={() => editSubcategory(item)}
                   onDelete={() =>
                     deleteItem(
@@ -1614,14 +1683,24 @@ export default function AdminDashboard() {
                 }}
               />
               <div className="mb-5">
-                <Uploader
-                  label="Upload Photo / Video"
-                  accept="image/*,video/*"
-                  loading={uploadingTarget === "gallery"}
-                  onChange={(e) => handleFileUpload(e, "gallery")}
-                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Uploader
+                    label="Upload Video / Main Media"
+                    accept="image/*,video/*"
+                    loading={uploadingTarget === "galleryMedia"}
+                    progress={uploadingTarget === "galleryMedia" ? uploadProgress : null}
+                    onChange={(e) => handleFileUpload(e, "galleryMedia")}
+                  />
+                  <Uploader
+                    label="Upload Cover Image"
+                    accept="image/*"
+                    loading={uploadingTarget === "galleryCover"}
+                    progress={uploadingTarget === "galleryCover" ? uploadProgress : null}
+                    onChange={(e) => handleFileUpload(e, "galleryCover")}
+                  />
+                </div>
                 <div className="mt-3 rounded-lg border border-gold/15 bg-gold/5 p-3 text-[11px] leading-5 text-white/60">
-                  Reels ke liye video upload karein, <span className="font-semibold text-gold">Use as reel</span> aur <span className="font-semibold text-gold">Show on home</span> on karein. Homepage featured media ke liye <span className="font-semibold text-gold">Featured gallery</span> + <span className="font-semibold text-gold">Show on home</span> use karein.
+                  Pehle video/main media upload karein, phir uske poster ke liye cover image upload karein. Reels ke liye <span className="font-semibold text-gold">Use as reel</span> aur <span className="font-semibold text-gold">Show on home</span> on karein.
                 </div>
               </div>
               <form onSubmit={saveGallery} className="space-y-4">
@@ -1665,13 +1744,6 @@ export default function AdminDashboard() {
                     ]}
                   />
                 </div>
-                <TextArea
-                  label="Description"
-                  value={galleryForm.description}
-                  onChange={(value) =>
-                    setGalleryForm({ ...galleryForm, description: value })
-                  }
-                />
                 <TextField
                   label="SEO Alt Text"
                   value={galleryForm.altText}
@@ -1680,39 +1752,6 @@ export default function AdminDashboard() {
                   }
                   placeholder="Cold pyro couple entry in Indore wedding by SKY SFX"
                 />
-                <TextArea
-                  label="Caption"
-                  value={galleryForm.caption}
-                  onChange={(value) =>
-                    setGalleryForm({ ...galleryForm, caption: value })
-                  }
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <TextField
-                    label="City"
-                    value={galleryForm.city}
-                    onChange={(value) =>
-                      setGalleryForm({ ...galleryForm, city: value })
-                    }
-                    placeholder="Indore"
-                  />
-                  <TextField
-                    label="Service Slug"
-                    value={galleryForm.serviceSlug}
-                    onChange={(value) =>
-                      setGalleryForm({ ...galleryForm, serviceSlug: value })
-                    }
-                    placeholder="cold-pyro-entry"
-                  />
-                  <TextField
-                    label="Video Duration"
-                    value={galleryForm.duration}
-                    onChange={(value) =>
-                      setGalleryForm({ ...galleryForm, duration: value })
-                    }
-                    placeholder="PT30S"
-                  />
-                </div>
                 <SelectField
                   label="Media Type"
                   value={galleryForm.mediaType}
@@ -1729,7 +1768,7 @@ export default function AdminDashboard() {
                   ]}
                 />
                 <TextField
-                  label="Media URL"
+                  label="Video / Main Media URL"
                   required
                   value={galleryForm.cloudinaryUrl}
                   onChange={(value) =>
@@ -1737,7 +1776,7 @@ export default function AdminDashboard() {
                   }
                 />
                 <TextField
-                  label="Thumbnail URL"
+                  label="Cover Image URL"
                   value={galleryForm.thumbnail}
                   onChange={(value) =>
                     setGalleryForm({ ...galleryForm, thumbnail: value })
@@ -1836,12 +1875,22 @@ export default function AdminDashboard() {
                 }}
               />
               <div className="mb-5">
-                <Uploader
-                  label="Upload Event Cover"
-                  accept="image/*"
-                  loading={uploadingTarget === "event"}
-                  onChange={(e) => handleFileUpload(e, "event")}
-                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Uploader
+                    label="Upload Event Video"
+                    accept="video/*"
+                    loading={uploadingTarget === "eventVideo"}
+                    progress={uploadingTarget === "eventVideo" ? uploadProgress : null}
+                    onChange={(e) => handleFileUpload(e, "eventVideo")}
+                  />
+                  <Uploader
+                    label="Upload Event Cover Image"
+                    accept="image/*"
+                    loading={uploadingTarget === "eventCover"}
+                    progress={uploadingTarget === "eventCover" ? uploadProgress : null}
+                    onChange={(e) => handleFileUpload(e, "eventCover")}
+                  />
+                </div>
               </div>
               <form onSubmit={saveEvent} className="space-y-4">
                 <TextField
@@ -1892,10 +1941,17 @@ export default function AdminDashboard() {
                   />
                 )}
                 <TextField
-                  label="Main Cover Media URL"
-                  value={eventForm.mediaUrl}
+                  label="Event Video URL"
+                  value={eventForm.videoUrl}
                   onChange={(value) =>
-                    setEventForm({ ...eventForm, mediaUrl: value })
+                    setEventForm({ ...eventForm, videoUrl: value })
+                  }
+                />
+                <TextField
+                  label="Event Cover Image URL"
+                  value={eventForm.coverImage}
+                  onChange={(value) =>
+                    setEventForm({ ...eventForm, coverImage: value })
                   }
                 />
                 <TextArea
@@ -1920,7 +1976,7 @@ export default function AdminDashboard() {
               render={(item) => (
                 <ContentCard
                   key={item._id}
-                  image={item.mediaUrls?.[0]}
+                  image={item.coverImage || item.mediaUrls?.[0]}
                   badge={
                     item.subcategory
                       ? `${item.category} / ${item.subcategory}`
@@ -1978,11 +2034,13 @@ function Uploader({
   label,
   accept,
   loading,
+  progress,
   onChange,
 }: {
   label: string;
   accept: string;
   loading: boolean;
+  progress?: number | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
@@ -1999,10 +2057,20 @@ function Uploader({
         className="w-full text-xs text-white/60 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gold file:text-black hover:file:bg-gold-hover file:cursor-pointer bg-black/40 border border-white/10 rounded-lg p-2 clickable"
       />
       {loading && (
-        <span className="text-xs text-gold animate-pulse flex items-center gap-2 mt-3">
-          <Loader2 className="w-3 h-3 animate-spin" />
-          Uploading to Cloudinary...
-        </span>
+        <div className="mt-3 space-y-2">
+          <span className="text-xs text-gold animate-pulse flex items-center gap-2">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Uploading to Cloudinary{typeof progress === "number" ? ` (${progress}%)` : "..."}
+          </span>
+          {typeof progress === "number" && (
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-gold transition-all duration-300"
+                style={{ width: `${Math.max(4, progress)}%` }}
+              />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

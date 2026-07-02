@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type React from "react";
 import Image from "next/image";
-import { CalendarDays, CheckCircle2, Flame, Images, Layers3, Loader2, MessageSquare, Search, Send, Sparkles } from "lucide-react";
+import { CheckCircle2, Flame, Images, Layers3, Loader2, MessageSquare, Search, Send, Sparkles, X } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
@@ -29,8 +28,6 @@ interface GalleryItem {
   subcategory?: string;
   categoryId?: string | { _id: string; name: string; slug: string };
   subcategoryId?: string | { _id: string; name: string; slug: string };
-  description?: string;
-  caption?: string;
   altText?: string;
   mediaType: "image" | "video";
   cloudinaryUrl: string;
@@ -39,9 +36,6 @@ interface GalleryItem {
   showOnHome: boolean;
   isReel: boolean;
 }
-
-const priorityFunctions = ["Haldi", "Mehndi", "Sangeet", "Varmala", "Bride Entry", "Groom Entry", "Couple Entry", "Reception"];
-const prioritySfx = ["Cold Pyro", "Fireworks", "Sparkle Entry", "CO2 Blast", "Confetti Blast", "Dry Ice Cloud", "Flame Show", "Stage SFX"];
 
 const getId = (value: string | { _id: string } | undefined) => (typeof value === "string" ? value : value?._id || "");
 
@@ -56,6 +50,7 @@ export default function HomeServiceExplorer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
+  const [selectedMedia, setSelectedMedia] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formStatus, setFormStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -102,36 +97,6 @@ export default function HomeServiceExplorer() {
     [selectedCategory, selectedSubcategoryId]
   );
 
-  const weddingCategory = useMemo(
-    () => categories.find((item) => item.name.toLowerCase().includes("wedding")),
-    [categories]
-  );
-
-  const sfxCategory = useMemo(
-    () => categories.find((item) => item.name.toLowerCase().includes("sfx") || item.name.toLowerCase().includes("fire")),
-    [categories]
-  );
-
-  const popularWeddingFunctions = useMemo(() => {
-    const items = weddingCategory?.subcategories || [];
-    return [
-      ...priorityFunctions
-        .map((name) => items.find((item) => item.name.toLowerCase() === name.toLowerCase()))
-        .filter(Boolean),
-      ...items.filter((item) => !priorityFunctions.some((name) => name.toLowerCase() === item.name.toLowerCase())),
-    ].slice(0, 8) as SubcategoryItem[];
-  }, [weddingCategory]);
-
-  const sfxHighlights = useMemo(() => {
-    const items = sfxCategory?.subcategories || [];
-    return [
-      ...prioritySfx
-        .map((name) => items.find((item) => item.name.toLowerCase() === name.toLowerCase()))
-        .filter(Boolean),
-      ...items.filter((item) => !prioritySfx.some((name) => name.toLowerCase() === item.name.toLowerCase())),
-    ].slice(0, 8) as SubcategoryItem[];
-  }, [sfxCategory]);
-
   const searchedCategories = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     if (!query) return categories;
@@ -148,7 +113,7 @@ export default function HomeServiceExplorer() {
       const matchesCategory = !selectedCategoryId || getId(item.categoryId) === selectedCategoryId;
       const matchesSubcategory = !selectedSubcategoryId || getId(item.subcategoryId) === selectedSubcategoryId;
       const query = searchTerm.trim().toLowerCase();
-      const matchesSearch = !query || `${item.title} ${item.category} ${item.subcategory || ""} ${item.description || ""} ${item.caption || ""}`.toLowerCase().includes(query);
+      const matchesSearch = !query || `${item.title} ${item.category} ${item.subcategory || ""}`.toLowerCase().includes(query);
       return matchesCategory && matchesSubcategory && matchesSearch;
     });
 
@@ -170,16 +135,6 @@ export default function HomeServiceExplorer() {
     setInquiryForm((prev) => ({
       ...prev,
       message: buildMessage(selectedCategory?.name || "", subcategory?.name || ""),
-    }));
-  };
-
-  const selectFunction = (category: CategoryItem | undefined, subcategory: SubcategoryItem) => {
-    if (!category) return;
-    setSelectedCategoryId(category._id);
-    setSelectedSubcategoryId(subcategory._id);
-    setInquiryForm((prev) => ({
-      ...prev,
-      message: buildMessage(category.name, subcategory.name),
     }));
   };
 
@@ -322,7 +277,7 @@ export default function HomeServiceExplorer() {
               <div className="rounded-lg border border-white/5 bg-charcoal p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Selected Category</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Choose function</p>
                     <h3 className="mt-1 text-xl font-bold text-white">{selectedCategory.name}</h3>
                   </div>
                   <button
@@ -354,29 +309,6 @@ export default function HomeServiceExplorer() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-              {popularWeddingFunctions.length > 0 && (
-                <FunctionPanel
-                  title="Popular Wedding Functions"
-                  icon={<CalendarDays className="h-5 w-5" />}
-                  category={weddingCategory}
-                  items={popularWeddingFunctions}
-                  selectedId={selectedSubcategoryId}
-                  onSelect={selectFunction}
-                />
-              )}
-              {sfxHighlights.length > 0 && (
-                <FunctionPanel
-                  title="SFX Highlights"
-                  icon={<Flame className="h-5 w-5" />}
-                  category={sfxCategory}
-                  items={sfxHighlights}
-                  selectedId={selectedSubcategoryId}
-                  onSelect={selectFunction}
-                />
-              )}
-            </div>
-
             <div className="rounded-lg border border-white/5 bg-charcoal p-5">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
@@ -392,7 +324,12 @@ export default function HomeServiceExplorer() {
               {filteredMedia.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredMedia.map((item) => (
-                    <div key={item._id} className="group overflow-hidden rounded-lg border border-white/5 bg-black">
+                    <button
+                      key={item._id}
+                      type="button"
+                      onClick={() => setSelectedMedia(item)}
+                      className="group overflow-hidden rounded-lg border border-white/5 bg-black text-left transition-colors hover:border-gold/30 clickable"
+                    >
                       <div className="relative aspect-video bg-black">
                         {item.mediaType === "video" ? (
                           <>
@@ -417,7 +354,7 @@ export default function HomeServiceExplorer() {
                         </p>
                         <h4 className="mt-1 line-clamp-2 text-sm font-bold text-white">{item.title}</h4>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -518,47 +455,46 @@ export default function HomeServiceExplorer() {
           </aside>
         </div>
       </div>
-    </section>
-  );
-}
 
-function FunctionPanel({
-  title,
-  icon,
-  category,
-  items,
-  selectedId,
-  onSelect,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  category?: CategoryItem;
-  items: SubcategoryItem[];
-  selectedId: string;
-  onSelect: (category: CategoryItem | undefined, subcategory: SubcategoryItem) => void;
-}) {
-  return (
-    <div className="rounded-lg border border-white/5 bg-charcoal p-5">
-      <div className="mb-4 flex items-center gap-3">
-        <span className="rounded-lg border border-gold/20 bg-gold/10 p-2 text-gold">{icon}</span>
-        <h3 className="text-lg font-bold text-white">{title}</h3>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {items.map((item) => (
+      {selectedMedia && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 text-white backdrop-blur-md">
           <button
-            key={item._id}
             type="button"
-            onClick={() => onSelect(category, item)}
-            className={`min-h-11 rounded-md border px-3 py-2 text-left text-xs font-semibold transition-colors clickable ${
-              selectedId === item._id
-                ? "border-gold bg-gold text-black"
-                : "border-white/10 bg-black/25 text-white/75 hover:border-gold/30 hover:text-white"
-            }`}
+            onClick={() => setSelectedMedia(null)}
+            className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/10 p-3 text-white/75 transition-colors hover:border-gold hover:text-gold clickable"
+            aria-label="Close media"
           >
-            {item.name}
+            <X className="h-5 w-5" />
           </button>
-        ))}
-      </div>
-    </div>
+
+          <div className="w-full max-w-5xl">
+            <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-gold/15 bg-black">
+              {selectedMedia.mediaType === "video" ? (
+                <video
+                  src={selectedMedia.cloudinaryUrl}
+                  controls
+                  autoPlay
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <Image
+                  src={selectedMedia.cloudinaryUrl}
+                  alt={selectedMedia.altText || selectedMedia.title}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                />
+              )}
+            </div>
+            <div className="mt-5 text-center">
+              <p className="text-xs font-bold uppercase tracking-widest text-gold">
+                {selectedMedia.subcategory ? `${selectedMedia.category} / ${selectedMedia.subcategory}` : selectedMedia.category}
+              </p>
+              <h3 className="mt-2 font-serif text-2xl font-bold text-white">{selectedMedia.title}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

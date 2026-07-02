@@ -7,6 +7,7 @@ export interface ISeoLocation extends Document {
   state: string;
   serviceAreas: string[];
   intro: string;
+  videoUrl?: string;
   sortOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -21,6 +22,7 @@ const SeoLocationSchema = new Schema(
     state: { type: String, required: true, trim: true },
     serviceAreas: { type: [String], default: [] },
     intro: { type: String, required: true },
+    videoUrl: { type: String, default: "", trim: true },
     sortOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },

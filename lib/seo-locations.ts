@@ -7,6 +7,7 @@ export type ServiceLocation = {
   state: string;
   serviceAreas: string[];
   intro: string;
+  videoUrl?: string;
 };
 
 export type LocationSeoPage = {

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { businessProfile } from "@/lib/business-profile";
-import { useContactSettings } from "@/lib/use-contact-settings";
+import { getVisiblePhoneContacts, useContactSettings } from "@/lib/use-contact-settings";
 import SocialBrandIcon from "@/components/SocialBrandIcon";
 
 export default function ReviewBusinessDetails() {
   const contactSettings = useContactSettings();
+  const phoneContacts = getVisiblePhoneContacts(contactSettings);
 
   return (
     <aside className="rounded-lg bg-charcoal border border-gold/15 p-6 h-fit">
@@ -16,12 +17,14 @@ export default function ReviewBusinessDetails() {
         <p>
           <span className="text-white font-semibold">Name:</span> {businessProfile.name}
         </p>
-        <p>
-          <span className="text-white font-semibold">Phone:</span>{" "}
-          <a href={contactSettings.phoneHref} className="text-gold hover:underline">
-            {contactSettings.phone}
-          </a>
-        </p>
+        {phoneContacts.map((item) => (
+          <p key={item.key}>
+            <span className="text-white font-semibold">{item.label}:</span>{" "}
+            <a href={item.href} className="text-gold hover:underline">
+              {item.phone}
+            </a>
+          </p>
+        ))}
         <p>
           <span className="text-white font-semibold">Email:</span>{" "}
           <a href={`mailto:${contactSettings.email}`} className="text-gold hover:underline">
@@ -40,30 +43,17 @@ export default function ReviewBusinessDetails() {
           </div>
         ))}
       </div>
-      {(contactSettings.instagramUrl || contactSettings.facebookUrl) && (
-        <div className="mt-6 grid grid-cols-2 gap-2">
-          {contactSettings.instagramUrl && (
-            <a
-              href={contactSettings.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors hover:border-gold/30 hover:text-gold clickable"
-            >
-              <SocialBrandIcon type="instagram" className="h-4 w-4" />
-              Instagram
-            </a>
-          )}
-          {contactSettings.facebookUrl && (
-            <a
-              href={contactSettings.facebookUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors hover:border-gold/30 hover:text-gold clickable"
-            >
-              <SocialBrandIcon type="facebook" className="h-4 w-4" />
-              Facebook
-            </a>
-          )}
+      {contactSettings.instagramUrl && (
+        <div className="mt-6 grid grid-cols-1 gap-2">
+          <a
+            href={contactSettings.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors hover:border-gold/30 hover:text-gold clickable"
+          >
+            <SocialBrandIcon type="instagram" className="h-4 w-4" />
+            Instagram
+          </a>
         </div>
       )}
       <Link
