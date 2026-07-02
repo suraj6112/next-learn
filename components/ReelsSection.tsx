@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, ArrowUp, Heart, Play, Share2, Volume2, VolumeX, X } from "lucide-react";
 import Link from "next/link";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 interface ReelItem {
   id: string;
@@ -262,7 +263,7 @@ export default function ReelsSection() {
                 className="relative aspect-[9/16] max-w-[360px] mx-auto w-full rounded-2xl overflow-hidden glass-panel group transition-transform duration-300 hover:scale-[1.02]"
               >
                 {/* Loop Video */}
-                <video
+                <VideoWithLoader
                   ref={(el) => {
                     videoRefs.current[reel.id] = el;
                   }}
@@ -271,7 +272,9 @@ export default function ReelsSection() {
                   muted={muted}
                   playsInline
                   autoPlay
+                  preload="metadata"
                   onClick={() => openViewer(index)}
+                  wrapperClassName="relative h-full w-full"
                   className="w-full h-full object-cover cursor-pointer"
                 />
 
@@ -377,7 +380,7 @@ export default function ReelsSection() {
                   className="relative flex h-dvh snap-start snap-always items-center justify-center bg-black px-0 sm:px-6"
                 >
                   <div className="relative h-dvh w-full overflow-hidden bg-black sm:h-[92dvh] sm:max-w-[520px] sm:rounded-lg sm:border sm:border-white/10">
-                    <video
+                    <VideoWithLoader
                       ref={(el) => {
                         viewerVideoRefs.current[reel.id] = el;
                       }}
@@ -386,7 +389,9 @@ export default function ReelsSection() {
                       muted={muted}
                       playsInline
                       autoPlay={index === viewerIndex}
+                      preload={index === viewerIndex ? "metadata" : "none"}
                       onClick={() => toggleViewerPlayback(reel.id)}
+                      wrapperClassName="relative h-full w-full"
                       className="h-full w-full object-cover"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/20" />

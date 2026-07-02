@@ -5,6 +5,7 @@ import Image from "next/image";
 import { CheckCircle2, Flame, Images, Layers3, Loader2, MessageSquare, Search, Send, Sparkles, X } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 interface SubcategoryItem {
   _id: string;
@@ -470,10 +471,12 @@ export default function HomeServiceExplorer() {
           <div className="w-full max-w-5xl">
             <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-gold/15 bg-black">
               {selectedMedia.mediaType === "video" ? (
-                <video
+                <VideoWithLoader
                   src={selectedMedia.cloudinaryUrl}
                   controls
                   autoPlay
+                  preload="metadata"
+                  wrapperClassName="relative h-full w-full"
                   className="h-full w-full object-contain"
                 />
               ) : (

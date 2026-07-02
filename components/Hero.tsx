@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Calendar, CheckCircle2, MessageCircle, Phone, Sparkles } from "lucide-react";
 import { getVisiblePhoneContacts, getWhatsappUrlFromSettings, useContactSettings } from "@/lib/use-contact-settings";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 export default function Hero() {
   const contactSettings = useContactSettings();
@@ -16,18 +17,22 @@ export default function Hero() {
   return (
     <section className="relative flex min-h-190 h-dvh w-full items-center justify-center overflow-hidden bg-black px-4 pt-24 pb-24 sm:px-6">
       {/* Cinematic Looping Background Video */}
-      <video
+      <VideoWithLoader
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 h-full w-full scale-105 object-cover opacity-45"
+        preload="metadata"
+        showLoading={false}
+        showError={false}
+        wrapperClassName="absolute inset-0"
+        className="h-full w-full scale-105 object-cover opacity-45"
       >
         <source
           src="https://assets.mixkit.co/videos/preview/mixkit-celebration-fireworks-in-the-night-sky-3765-large.mp4"
           type="video/mp4"
         />
-      </video>
+      </VideoWithLoader>
 
       {/* Radial Gold Gradient Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black via-black/55 to-black/25" />

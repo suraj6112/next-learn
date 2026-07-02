@@ -5,51 +5,37 @@
 ▲ Next.js 16.2.9 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.56.1:3000
-✓ Ready in 360ms
+- Environments: .env
+✓ Ready in 917ms
 Creating turbopack project {
-  dir: 'E:\\Suraj_Verma_Work\\Event Planning\\sky-sfx',
+  dir: 'C:\\Users\\Vinayak\\Desktop\\suraj\\learn_next',
   testMode: true
 }
 
- GET /contact 200 in 881ms (next.js: 555ms, application-code: 326ms)
- GET /manifest.webmanifest 200 in 118ms (next.js: 99ms, application-code: 18ms)
- GET /api/contact-settings 200 in 293ms (next.js: 249ms, application-code: 43ms)
- GET /api/contact-settings 200 in 10ms (next.js: 3ms, application-code: 7ms)
-✓ Compiled in 156ms
- GET /contact 200 in 57ms (next.js: 30ms, application-code: 28ms)
- GET /manifest.webmanifest 200 in 17ms (next.js: 14ms, application-code: 4ms)
- GET /api/contact-settings 200 in 38ms (next.js: 33ms, application-code: 5ms)
-✓ Compiled in 115ms
- GET /contact 200 in 49ms (next.js: 25ms, application-code: 24ms)
- GET /manifest.webmanifest 200 in 15ms (next.js: 12ms, application-code: 3ms)
- GET /contact 200 in 42ms (next.js: 22ms, application-code: 20ms)
- GET /manifest.webmanifest 200 in 15ms (next.js: 12ms, application-code: 3ms)
- GET /contact 200 in 46ms (next.js: 24ms, application-code: 21ms)
- GET /manifest.webmanifest 200 in 16ms (next.js: 13ms, application-code: 3ms)
- GET /contact 200 in 8ms (next.js: 3ms, application-code: 5ms)
- GET /contact 200 in 14ms (next.js: 1788µs, application-code: 12ms)
- GET /manifest.webmanifest 200 in 5ms (next.js: 1758µs, application-code: 3ms)
-✓ Compiled in 117ms
- GET /contact 200 in 46ms (next.js: 24ms, application-code: 22ms)
- GET /manifest.webmanifest 200 in 18ms (next.js: 14ms, application-code: 5ms)
-✓ Compiled in 108ms
- GET /contact 200 in 53ms (next.js: 25ms, application-code: 27ms)
- GET /manifest.webmanifest 200 in 14ms (next.js: 11ms, application-code: 3ms)
- GET /contact 200 in 40ms (next.js: 20ms, application-code: 19ms)
- GET /manifest.webmanifest 200 in 14ms (next.js: 11ms, application-code: 3ms)
- GET /contact 200 in 39ms (next.js: 23ms, application-code: 16ms)
- GET /manifest.webmanifest 200 in 13ms (next.js: 11ms, application-code: 3ms)
-✓ Compiled in 126ms
- GET /contact 200 in 47ms (next.js: 25ms, application-code: 22ms)
- GET /manifest.webmanifest 200 in 16ms (next.js: 13ms, application-code: 3ms)
- GET / 200 in 50ms (next.js: 35ms, application-code: 15ms)
- GET /api/contact-settings 200 in 142ms (next.js: 34ms, application-code: 107ms)
- GET /api/gallery?reels=true&showOnHome=true 200 in 163ms (next.js: 123ms, application-code: 39ms)
- GET /api/gallery?featured=true&showOnHome=true 200 in 165ms (next.js: 130ms, application-code: 35ms)
- GET /api/home-stats 200 in 208ms (next.js: 83ms, application-code: 125ms)
- GET /api/contact-settings 200 in 20ms (next.js: 4ms, application-code: 16ms)
- GET /manifest.webmanifest 200 in 10ms (next.js: 7ms, application-code: 3ms)
- GET /api/gallery?featured=true&showOnHome=true 200 in 31ms (next.js: 7ms, application-code: 24ms)
- GET /api/home-stats 200 in 8ms (next.js: 1990µs, application-code: 6ms)
- GET /api/gallery?reels=true&showOnHome=true 200 in 44ms (next.js: 11ms, application-code: 33ms)
+[db] Connecting to MongoDB: mongodb+srv://***:***@cluster0.3jcjmeq.mongodb.net/sky-sfx?appName=Cluster0
+[db] Reusing pending MongoDB connection
+[db] Reusing pending MongoDB connection
+[db] Reusing pending MongoDB connection
+[db] Reusing pending MongoDB connection
+[db] MongoDB connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+ GET / 200 in 6.1s (next.js: 2.5s, application-code: 3.6s)
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+ GET / 200 in 147ms (next.js: 9ms, application-code: 138ms)
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+ GET / 200 in 467ms (next.js: 131ms, application-code: 336ms)
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+[db] MongoDB already connected: ac-x4akfmd-shard-00-00.3jcjmeq.mongodb.net/sky-sfx
+ GET /gallery 200 in 403ms (next.js: 179ms, application-code: 224ms)
+ GET /services 200 in 435ms (next.js: 65ms, application-code: 370ms)
+ GET /locations 200 in 172ms (next.js: 53ms, application-code: 119ms)
 [?25h

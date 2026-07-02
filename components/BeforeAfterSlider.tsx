@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeftRight, HelpCircle } from "lucide-react";
 
 export default function BeforeAfterSlider() {
   const [sliderPosition, setSliderPosition] = useState(50); // percentage (0-100)
   const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleMove = (clientX: number) => {
+  const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
@@ -16,17 +17,30 @@ export default function BeforeAfterSlider() {
     if (percentage < 0) percentage = 0;
     if (percentage > 100) percentage = 100;
     setSliderPosition(percentage);
-  };
+  }, []);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging) return;
     handleMove(e.touches[0].clientX);
-  };
+  }, [handleMove, isDragging]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     handleMove(e.clientX);
-  };
+  }, [handleMove, isDragging]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const updateWidth = () => {
+      setContainerWidth(containerRef.current?.getBoundingClientRect().width || null);
+    };
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const handleMouseUp = () => setIsDragging(false);
@@ -44,7 +58,7 @@ export default function BeforeAfterSlider() {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleMouseUp);
     };
-  }, [isDragging]);
+  }, [handleMouseMove, handleTouchMove, isDragging]);
 
   const onMouseDown = () => setIsDragging(true);
 
@@ -71,6 +85,8 @@ export default function BeforeAfterSlider() {
           <img
             src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1200"
             alt="After Decor"
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
             draggable="false"
           />
@@ -86,8 +102,10 @@ export default function BeforeAfterSlider() {
             <img
               src="https://images.unsplash.com/photo-1505232458627-539696144064?auto=format&fit=crop&q=80&w=1200"
               alt="Before Empty Space"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
-              style={{ width: containerRef.current?.getBoundingClientRect().width }}
+              style={{ width: containerWidth || "100%" }}
               draggable="false"
             />
             <div className="absolute top-4 left-4 bg-white/90 text-black px-3 py-1 rounded font-bold text-xs uppercase z-10 shadow">

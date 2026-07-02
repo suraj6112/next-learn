@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Check, Database, Loader2, Pencil, Send, Trash, Upload, XCircle } from "lucide-react";
 import axios from "axios";
 import { uploadToCloudinary } from "@/lib/cloudinary-client";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 type SeoServiceItem = {
   _id: string;
@@ -421,7 +422,13 @@ export default function AdminSeoPage() {
                 </div>
                 <TextField label="Service Video URL" value={serviceForm.videoUrl} onChange={(value) => setServiceForm({ ...serviceForm, videoUrl: value })} />
                 {serviceForm.videoUrl && (
-                  <video src={serviceForm.videoUrl} controls className="w-full rounded-lg border border-white/10 bg-black" />
+                  <VideoWithLoader
+                    src={serviceForm.videoUrl}
+                    controls
+                    preload="metadata"
+                    wrapperClassName="relative overflow-hidden rounded-lg border border-white/10 bg-black"
+                    className="w-full"
+                  />
                 )}
                 <TextArea label="Intro" required value={serviceForm.intro} onChange={(value) => setServiceForm({ ...serviceForm, intro: value })} />
                 <TextArea label="Keywords (one per line)" value={serviceForm.keywordsText} onChange={(value) => setServiceForm({ ...serviceForm, keywordsText: value })} />
@@ -488,7 +495,13 @@ export default function AdminSeoPage() {
                 </div>
                 <TextField label="Location Video URL" value={locationForm.videoUrl} onChange={(value) => setLocationForm({ ...locationForm, videoUrl: value })} />
                 {locationForm.videoUrl && (
-                  <video src={locationForm.videoUrl} controls className="w-full rounded-lg border border-white/10 bg-black" />
+                  <VideoWithLoader
+                    src={locationForm.videoUrl}
+                    controls
+                    preload="metadata"
+                    wrapperClassName="relative overflow-hidden rounded-lg border border-white/10 bg-black"
+                    className="w-full"
+                  />
                 )}
                 <NumberField label="Sort Order" value={locationForm.sortOrder} onChange={(value) => setLocationForm({ ...locationForm, sortOrder: value })} />
                 <Checkbox label="Active" checked={locationForm.isActive} onChange={(checked) => setLocationForm({ ...locationForm, isActive: checked })} />

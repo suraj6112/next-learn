@@ -1,54 +1,7 @@
-[browser] Failed to fetch RSC payload for http://localhost:3000/contact. Falling back to browser navigation. TypeError: Failed to fetch
-    at createFetch (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8207:21)
-    at async fetchServerResponse (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8051:21)
-    at async fetchMissingDynamicData (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:9464:24) (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8128:21)
-[browser] ./components/Hero.tsx:125:99
-Expected '</', got '['
-  123 | ...one select-none overflow-hidden">
-  124 | ...%] w-0.5 h-25 bg-linear-to-t from-gold/50 to-transparent animate-pulse" />
-> 125 | ...%]         <div className="absolute bottom-[-5%] left-[80%] w-0.5 h-[80px] bg-linear-t...
-      |                                               ^
-  126 | ... animate-pulse" style={{ animationDelay: "1.5s" }} />
-  127 | ...] w-0.5 h-[80px] bg-linear-to-t from-gold/40 to-transparent animate-pulse" style={{ an...
-  128 | ...
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Vinayak\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Vinayak\Desktop\suraj\learn_next\package-lock.json
 
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./components/Hero.tsx [Client Component Browser]
-    ./app/page.tsx [Client Component Browser]
-    ./app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./components/Hero.tsx [Client Component SSR]
-    ./app/page.tsx [Client Component SSR]
-    ./app/page.tsx [Server Component] 
-    at handleErrors (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
-    at processMessage (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
-    at WebSocket.handleMessage (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
-[browser] ./components/Hero.tsx:125:99
-Expected '</', got '['
-  123 | ...one select-none overflow-hidden">
-  124 | ...%] w-0.5 h-25 bg-linear-to-t from-gold/50 to-transparent animate-pulse" />
-> 125 | ...%]         <div className="absolute bottom-[-5%] left-[80%] w-0.5 h-[80px] bg-linear-t...
-      |                                               ^
-  126 | ... animate-pulse" style={{ animationDelay: "1.5s" }} />
-  127 | ...] w-0.5 h-[80px] bg-linear-to-t from-gold/40 to-transparent animate-pulse" style={{ an...
-  128 | ...
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./components/Hero.tsx [Client Component Browser]
-    ./app/page.tsx [Client Component Browser]
-    ./app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./components/Hero.tsx [Client Component SSR]
-    ./app/page.tsx [Client Component SSR]
-    ./app/page.tsx [Server Component] 
-    at handleErrors (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)
-    at processMessage (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:14014:21)
-    at WebSocket.handleMessage (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13458:52) (file://E:/Suraj_Verma_Work/Event Planning/sky-sfx/.next/dev/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13951:21)

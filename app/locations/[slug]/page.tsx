@@ -11,6 +11,7 @@ import { getSiteUrl } from "@/lib/seo-services";
 import { getBreadcrumbSchema } from "@/lib/site-seo";
 import { getRelatedContent } from "@/lib/related-content";
 import RelatedContent from "@/components/RelatedContent";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 type PageProps = {
   params: Promise<{
@@ -179,11 +180,12 @@ export default async function LocationSeoPage({ params }: PageProps) {
               Event work around {page.location.city}
             </h2>
             <div className="overflow-hidden rounded-lg border border-gold/15 bg-black">
-              <video
+              <VideoWithLoader
                 src={page.location.videoUrl}
                 controls
                 preload="metadata"
                 poster={page.service.heroImage}
+                wrapperClassName="relative w-full"
                 className="w-full aspect-video bg-black object-contain"
               />
             </div>

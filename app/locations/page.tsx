@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import { getLocationSeoPages, getSeoLocations } from "@/lib/seo-dynamic";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 export const metadata: Metadata = {
   title: "Service Locations for Event SFX, Fire Shows and Wedding Entries | SKY SFX",
@@ -49,10 +50,11 @@ export default async function LocationsPage() {
 
                 {location.videoUrl && (
                   <div className="mb-6 overflow-hidden rounded-lg border border-gold/15 bg-black">
-                    <video
+                    <VideoWithLoader
                       src={location.videoUrl}
                       controls
                       preload="metadata"
+                      wrapperClassName="relative w-full"
                       className="w-full aspect-video bg-black object-contain"
                     />
                   </div>

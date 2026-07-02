@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Play, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 interface GalleryItem {
   _id: string;
@@ -208,6 +209,8 @@ export default function Gallery() {
                     <img
                       src={item.thumbnail}
                       alt={item.altText || item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
@@ -223,6 +226,8 @@ export default function Gallery() {
                 <img
                   src={item.cloudinaryUrl}
                   alt={item.altText || item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover opacity-75 group-hover:opacity-95 group-hover:scale-105 transition-all duration-500"
                 />
               )}
@@ -279,16 +284,20 @@ export default function Gallery() {
             {/* Lightbox Media Container */}
             <div className="max-w-4xl w-full aspect-video rounded-2xl overflow-hidden border border-gold/15 bg-black relative flex items-center justify-center">
               {currentItem.mediaType === "video" ? (
-                <video
+                <VideoWithLoader
                   src={currentItem.cloudinaryUrl}
                   controls
                   autoPlay
+                  preload="metadata"
+                  wrapperClassName="relative h-full w-full"
                   className="w-full h-full max-h-[80vh] object-contain"
                 />
               ) : (
                 <img
                   src={currentItem.cloudinaryUrl}
                   alt={currentItem.altText || currentItem.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full max-h-[80vh] object-contain"
                 />
               )}

@@ -67,6 +67,8 @@ export default function Events() {
                     <img
                       src={event.coverImage || event.mediaUrls[0]}
                       alt={event.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
                     />
                   ) : (

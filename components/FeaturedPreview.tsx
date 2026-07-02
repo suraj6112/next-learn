@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Play, Volume2, VolumeX, X } from "lucide-react";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 interface GalleryItem {
   _id: string;
@@ -176,6 +177,8 @@ export default function FeaturedPreview() {
                     <img
                       src={item.thumbnail}
                       alt={item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
@@ -192,6 +195,8 @@ export default function FeaturedPreview() {
                 <img
                   src={item.cloudinaryUrl}
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
                 />
               )}
@@ -252,7 +257,7 @@ export default function FeaturedPreview() {
               >
                 <div className="relative flex h-dvh w-full items-center justify-center overflow-hidden bg-black sm:h-[86dvh] sm:max-w-6xl sm:rounded-lg sm:border sm:border-white/10">
                   {item.mediaType === "video" ? (
-                    <video
+                    <VideoWithLoader
                       ref={(el) => {
                         videoRefs.current[item._id] = el;
                       }}
@@ -262,13 +267,17 @@ export default function FeaturedPreview() {
                       playsInline
                       autoPlay={index === viewerIndex}
                       controls
+                      preload={index === viewerIndex ? "metadata" : "none"}
                       poster={item.thumbnail}
+                      wrapperClassName="relative h-full w-full"
                       className="h-full w-full object-contain"
                     />
                   ) : (
                     <img
                       src={item.cloudinaryUrl}
                       alt={item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-contain"
                     />
                   )}

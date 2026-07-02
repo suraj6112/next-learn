@@ -8,6 +8,7 @@ import { getRelatedContent } from "@/lib/related-content";
 import { getSiteUrl } from "@/lib/seo-services";
 import { getBreadcrumbSchema } from "@/lib/site-seo";
 import RelatedContent from "@/components/RelatedContent";
+import VideoWithLoader from "@/components/VideoWithLoader";
 
 type PageProps = {
   params: Promise<{
@@ -191,7 +192,13 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
               {item.mediaUrls.map((url) => (
                 <div key={url} className="relative aspect-video rounded-lg overflow-hidden bg-charcoal border border-white/5">
                   {url.includes(".mp4") || url.includes("/video/") ? (
-                    <video src={url} controls className="w-full h-full object-cover" />
+                    <VideoWithLoader
+                      src={url}
+                      controls
+                      preload="metadata"
+                      wrapperClassName="relative h-full w-full"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <Image src={url} alt={item.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover opacity-85" />
                   )}
